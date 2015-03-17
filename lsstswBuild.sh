@@ -16,6 +16,7 @@ BUILDER_NAME=""
 BUILD_NUMBER="0"
 REFS=""
 FAILED_LOGS="FailedLogs"
+BUILD_DOCS="yes"
 
 # Buildbot remotely invokes scripts with a stripped down environment.  
 umask 002
@@ -27,7 +28,7 @@ print_error() {
 }
 #---------------------------------------------------------------------------
 
-options=(getopt --long newbuild,builder_name:,build_number:,branch:,email: -- "$@")
+options=(getopt --long newbuild,builder_name:,build_number:,branch:,email,skip_docs: -- "$@")
 while true
 do
     case "$1" in
@@ -36,6 +37,7 @@ do
         --branch)       BRANCH=$2         ; shift 2 ;;
         --email)        EMAIL=$2          ; shift 2 ;;
         --newbuild)     NEW_BUILD="yes"   ; shift 1 ;;
+        --skip_docs)    BUILD_DOCS="no"   ; shift 1 ;;
         --) shift ; break ;;
         *) [ "$*" != "" ] && echo "Parsed options; arguments left are:$*:"
             break;;
@@ -143,21 +145,25 @@ fi
 
 
 # Build doxygen documentation
-echo "Start Documentation build at: `date`"
-cd $BUILD_DIR
-${SCRIPT_DIR}/create_xlinkdocs.sh --type "master" --user "buildbot" --host "lsst-dev.ncsa.illinois.edu" --path "/lsst/home/buildbot/public_html/doxygen"
-RET=$?
+if [ $BUILD_DOCS == "yes" ]; then
+    echo "Start Documentation build at: `date`"
+    cd $BUILD_DIR
+    ${SCRIPT_DIR}/create_xlinkdocs.sh --type "master" --user "buildbot" --host "lsst-dev.ncsa.illinois.edu" --path "/lsst/home/buildbot/public_html/doxygen"
+    RET=$?
 
-if [ $RET -eq 2 ]; then
-    print_error "*** Doxygen documentation returned with a warning."
-    print_error "*** Review the Buildbot 'stdio' log for build: $BUILD_NUMBER."
-    exit $BUILDBOT_WARNING
-elif [ $RET -ne 0 ]; then
-    print_error "*** FAILURE: Doxygen document was not installed."
-    print_error "*** Review the Buildbot 'stdio' log for build: $BUILD_NUMBER."
-    exit $BUILDBOT_FAILURE
+    if [ $RET -eq 2 ]; then
+        print_error "*** Doxygen documentation returned with a warning."
+        print_error "*** Review the Buildbot 'stdio' log for build: $BUILD_NUMBER."
+        exit $BUILDBOT_WARNING
+    elif [ $RET -ne 0 ]; then
+        print_error "*** FAILURE: Doxygen document was not installed."
+        print_error "*** Review the Buildbot 'stdio' log for build: $BUILD_NUMBER."
+        exit $BUILDBOT_FAILURE
+    fi
+    echo "Doxygen Documentation was installed successfully."
+else
+    echo "Skipping Documentation build."
 fi
-echo "Doxygen Documentation was installed successfully."
 
 #=================================================================
 # Then the BB_LastTag file is updated since full processing completed 
