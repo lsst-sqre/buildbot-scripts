@@ -6,9 +6,8 @@
 #  explicitly checks literal strings to ensure that non-standard buildbot 
 #  expectations regarding the 'work' directory location are  equivalent.
 # /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
-
-source ${0%/*}/settings.cfg.sh
-BUILDBOT_SCRIPTS=$BB_ANCESTRAL_HOME/RHEL6/scripts
+SCRIPT_DIR=${0%/*}
+source ${SCRIPT_DIR}/settings.cfg.sh
 
 # Reuse an existing lsstsw installation
 NEW_BUILD="no"     
@@ -161,7 +160,7 @@ fi
 # Build doxygen documentation
 echo "Start Documentation build at: `date`"
 cd $LSSTSW/build
-$BUILDBOT_SCRIPTS/create_xlinkdocs.sh --type "master" --user "buildbot" --host "lsst-dev.ncsa.illinois.edu" --path "/lsst/home/buildbot/public_html/doxygen"
+${SCRIPT_DIR}/create_xlinkdocs.sh --type "master" --user "buildbot" --host "lsst-dev.ncsa.illinois.edu" --path "/lsst/home/buildbot/public_html/doxygen"
 RET=$?
 
 if [ $RET -eq 2 ]; then
@@ -185,7 +184,7 @@ od -bc $WORK_DIR/build/BB_Last_Tag
 # Finally run a simple test of package integration
 echo "Start Demo run at: `date`"
 cd $LSSTSW/build
-$BUILDBOT_SCRIPTS/runManifestDemo.sh --builder_name $BUILDER_NAME --build_number $BUILD_NUMBER --tag $TAG  --small
+${SCRIPT_DIR}/runManifestDemo.sh --builder_name $BUILDER_NAME --build_number $BUILD_NUMBER --tag $TAG  --small
 RET=$?
 
 if [ $RET -eq 2 ]; then

@@ -1,6 +1,9 @@
 #! /bin/bash
 # Run the demo code to test DM algorithms
 
+SCRIPT_DIR=${0%/*}
+source ${SCRIPT_DIR}/settings.cfg.sh
+
 DEBUG=debug
 
 #--------------------------------------------------------------------------
@@ -37,8 +40,6 @@ print_error() {
 
 # This setup required due to eups usage.
 source $EUPS_DIR/bin/setups.sh
-# Setup LSST buildbot support fnunctions
-source ${0%/*}/settings.cfg.sh
 
 BUILDER_NAME=""
 BUILD_NUMBER=0
@@ -137,8 +138,8 @@ j=1
 NEWCOLUMNS=`for i in $COLUMNS; do echo -n "$j:$i "; j=$((j+1)); done`
 echo "Columns in benchmark datafile:"
 echo $NEWCOLUMNS
-echo "$BB_ANCESTRAL_HOME/numdiff/bin/numdiff -# 11 detected-sources$SIZE_EXT.txt.expected detected-sources$SIZE_EXT.txt"
-$BB_ANCESTRAL_HOME/numdiff/bin/numdiff -# 11 detected-sources$SIZE_EXT.txt.expected detected-sources$SIZE_EXT.txt
+echo "${SCRIPT_DIR}/numdiff/bin/numdiff -# 11 detected-sources$SIZE_EXT.txt.expected detected-sources$SIZE_EXT.txt"
+${SCRIPT_DIR}/numdiff/bin/numdiff -# 11 detected-sources$SIZE_EXT.txt.expected detected-sources$SIZE_EXT.txt
 if  [ $? != 0 ]; then
     print_error "*** Warning: output results not within error tolerance for: $DEMO_BASENAME"
     exit $BUILDBOT_WARNING

@@ -1,9 +1,11 @@
 #! /bin/bash
 # Build cross linked doxygen documents and load into buildbot public_html website
 
+SCRIPT_DIR=${0%/*}
+source ${SCRIPT_DIR}/settings.cfg.sh
+
 # This setup required due to eups usage.
 source $EUPS_DIR/bin/setups.sh
-source ${0%/*}/settings.cfg.sh
 
 DEBUG=debug
 
