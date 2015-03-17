@@ -5,8 +5,6 @@ SCRIPT_DIR=${0%/*}
 source ${SCRIPT_DIR}/settings.cfg.sh
 source ${LSSTSW}/bin/setup.sh
 
-DEBUG=debug
-
 #--------------------------------------------------------------------------
 # Standalone invocation for gcc master stack:
 #--------------------------------------------------------------------------
@@ -22,7 +20,6 @@ usage() {
     echo "Initiate demonstration run."
     echo
     echo "Options:"
-    echo "                  --debug: print out extra debugging info"
     echo "              --tag <id> : eups-tag for eups-setup or defaults to latest master build."
     echo "                 --small : to use small dataset; otherwise a mini-production size will be used."
     echo "    --builder_name <name>: buildbot's build name assigned to run."
@@ -48,12 +45,11 @@ TAG=""
 SIZE=""
 SIZE_EXT=""
 
-options=$(getopt -l debug,help,small,builder_name:,build_number:,tag:,log_dest:,log_url:,step_name: -- "$@")
+options=$(getopt -l help,small,builder_name:,build_number:,tag:,log_dest:,log_url:,step_name: -- "$@")
 
 while true
 do
     case $1 in
-        --debug)        DEBUG=true; shift 1;;
         --help)         usage;;
         --small)        SIZE="small";
                         SIZE_EXT="_small"; 

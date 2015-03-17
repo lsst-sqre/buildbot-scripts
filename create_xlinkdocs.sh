@@ -5,8 +5,6 @@ SCRIPT_DIR=${0%/*}
 source ${SCRIPT_DIR}/settings.cfg.sh
 source ${LSSTSW}/bin/setup.sh
 
-DEBUG=debug
-
 usage() {
     echo "Usage: $0 --type <type> --user <remote user on doxy host> --host <remote doxy host> --path  <remote doxy docs path>"
     echo "Build crosslinked doxygen documentation and install on LSST website."
