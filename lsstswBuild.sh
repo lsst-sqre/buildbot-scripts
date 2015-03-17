@@ -6,6 +6,7 @@
 #  explicitly checks literal strings to ensure that non-standard buildbot 
 #  expectations regarding the 'work' directory location are  equivalent.
 # /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+
 SCRIPT_DIR=${0%/*}
 source ${SCRIPT_DIR}/settings.cfg.sh
 source ${LSSTSW}/bin/setup.sh
@@ -71,13 +72,12 @@ if [ $? -ne 0 ]; then
 fi
 
 # Rebuild the stack if a git pkg changed. 
-cd $LSSTSW
-if [ ! -f ./bin/rebuild ]; then
+if [ ! -f ${LSSTSW}/bin/rebuild ]; then
      print_error "Failed to find 'rebuild'." 
      exit $BUILDBOT_FAILURE
 fi
 echo "Rebuild is commencing....stand by; using $REF_LIST"
-./bin/rebuild  $REF_LIST 
+${LSSTSW}/bin/rebuild  $REF_LIST
 RET=$?
 
 #=================================================================
@@ -149,7 +149,6 @@ fi
 # Build doxygen documentation
 if [ $BUILD_DOCS == "yes" ]; then
     echo "Start Documentation build at: `date`"
-    cd $BUILD_DIR
     ${SCRIPT_DIR}/create_xlinkdocs.sh --type "master" --user "buildbot" --host "lsst-dev.ncsa.illinois.edu" --path "/lsst/home/buildbot/public_html/doxygen"
     RET=$?
 
@@ -177,7 +176,6 @@ od -bc ${BUILD_DIR}/BB_Last_Tag
 # Finally run a simple test of package integration
 if [ $RUN_DEMO == "yes" ]; then
     echo "Start Demo run at: `date`"
-    cd $BUILD_DIR
     ${SCRIPT_DIR}/runManifestDemo.sh --builder_name $BUILDER_NAME --build_number $BUILD_NUMBER --tag $TAG  --small
     RET=$?
 
