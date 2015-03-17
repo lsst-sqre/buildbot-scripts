@@ -8,6 +8,7 @@
 # /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 SCRIPT_DIR=${0%/*}
 source ${SCRIPT_DIR}/settings.cfg.sh
+source ${LSSTSW}/bin/setup.sh
 
 # Reuse an existing lsstsw installation
 NEW_BUILD="no"     
@@ -53,21 +54,7 @@ echo "BRANCH:$BRANCH:"
 export REF_LIST=`echo $BRANCH | sed  -e "s/ \+ / /g" -e "s/^/ /" -e "s/ $//" -e "s/ / -r /g"`
 echo "REF_LIST: $REF_LIST   pwd: $WORK_DIR    NEW_BUILD: $NEW_BUILD"
 
-if [ "$NEW_BUILD" ==  "no" ]; then
-    echo "Check reusable stack has well-formed eups directory"
-    if [ "$WORK_DIR" ==  "/lsst/home/lsstsw" ]; then
-        export LSSTSW=$WORK_DIR
-        export EUPS_PATH=$LSSTSW"/stack"
-        . $LSSTSW/bin/setup.sh
-        if [ $? -ne 0 ]; then
-            print_error "Failed to _setup_ existing stack: $WORK_DIR ."
-            exit $BUILDBOT_FAILURE
-        fi
-    else   # If stack missing, need to recover from backups
-        print_error "Failed to find required stack: $WORK_DIR ."
-        exit $BUILDBOT_FAILURE
-    fi
-else
+if [ "$NEW_BUILD" !=  "no" ]; then
     print_error "This slave does not create new stacks. Contact your buildbot nanny."
     exit $BUILDBOT_FAILURE
 fi

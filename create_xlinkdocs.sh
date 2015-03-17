@@ -3,9 +3,7 @@
 
 SCRIPT_DIR=${0%/*}
 source ${SCRIPT_DIR}/settings.cfg.sh
-
-# This setup required due to eups usage.
-source $EUPS_DIR/bin/setups.sh
+source ${LSSTSW}/bin/setup.sh
 
 DEBUG=debug
 

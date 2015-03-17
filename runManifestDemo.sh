@@ -3,6 +3,7 @@
 
 SCRIPT_DIR=${0%/*}
 source ${SCRIPT_DIR}/settings.cfg.sh
+source ${LSSTSW}/bin/setup.sh
 
 DEBUG=debug
 
@@ -37,9 +38,6 @@ print_error() {
     echo $@ > /proc/self/fd/2
 }
 #--------------------------------------------------------------------------
-
-# This setup required due to eups usage.
-source $EUPS_DIR/bin/setups.sh
 
 BUILDER_NAME=""
 BUILD_NUMBER=0
