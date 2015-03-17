@@ -3,7 +3,7 @@
 
 # This setup required due to eups usage.
 source $EUPS_DIR/bin/setups.sh
-source ${0%/*}/gitConstants.sh
+source ${0%/*}/settings.cfg.sh
 
 DEBUG=debug
 

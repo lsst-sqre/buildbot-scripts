@@ -7,7 +7,7 @@
 #  expectations regarding the 'work' directory location are  equivalent.
 # /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 
-source ${0%/*}/gitConstants.sh
+source ${0%/*}/settings.cfg.sh
 BUILDBOT_SCRIPTS=$BB_ANCESTRAL_HOME/RHEL6/scripts
 
 # Reuse an existing lsstsw installation
