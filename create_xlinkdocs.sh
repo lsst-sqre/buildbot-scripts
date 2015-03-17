@@ -78,7 +78,8 @@ echo "REMOTE_DIR: $REMOTE_DIR"
 echo "DESTINATION: $DESTINATION"
 echo "DOXY_TYPE: $DOXY_TYPE"
 echo "NORMATIVE_DOXY_TYPE: $NORMATIVE_DOXY_TYPE"
-echo "SCM_SERVER: $SCM_SERVER"
+echo "DOC_REPO_URL: $DOC_REPO_URL"
+echo "DOC_REPO_DIR: $DOC_REPO_DIR"
 
 ssh "$REMOTE_USER@$REMOTE_HOST" pwd
 if [ $? != 0 ]; then
@@ -93,21 +94,17 @@ if [ $? != 0 ]; then
 fi
 
 # Ensure fresh extraction
-cd $BUILD_DIR
-rm -rf lsstDoxygen
-SCM_LOCAL_DIR=lsstDoxygen
+rm -rf $DOC_REPO_DIR
 
-# SCM clone devenv/lsstDoxygen ** from master **
-git clone https://${SCM_SERVER}/LSST/lsstDoxygen.git
-
+# SCM clone lsstDoxygen ** from master **
+git clone $DOC_REPO_URL $DOC_REPO_DIR
 if [ $? != 0 ]; then
-    echo "*** Failed to clone 'devenv/lsstDoxygen.git'."
+    echo "*** Failed to clone '$DOC_REPO_URL'."
     exit $BUILDBOT_FAILURE
 fi
 
-# setup all packages required by devenv/lsstDoxygen's eups
-cd $SCM_LOCAL_DIR
-echo "SCM_LOCAL_DIR: $SCM_LOCAL_DIR"
+# setup all packages required by lsstDoxygen's eups
+cd $DOC_REPO_DIR
 setup -t $DOXY_TYPE -r .
 eups list -s
 
@@ -134,7 +131,7 @@ eups list -s
 echo ""
 
 
-${BUILD_DIR}/$SCM_LOCAL_DIR/bin/makeDocs --nodot datarel $DATAREL_VERSION > MakeDocs.out
+${DOC_REPO_DIR}/bin/makeDocs --nodot datarel $DATAREL_VERSION > MakeDocs.out
 if [ $? != 0 ] ; then
     echo "*** Failed to generate complete makeDocs output for \"$DOXY_TYPE\" source."
     exit $BUILDBOT_FAILURE
@@ -146,8 +143,6 @@ if [ $? != 0 ] ; then
     exit $BUILDBOT_FAILURE
 fi
 
-cd ${BUILD_DIR}/$SCM_LOCAL_DIR
-
 # rename the html directory 
 echo "Move the documentation into web position"
 DOC_DIR="xlink_${NORMATIVE_DOXY_TYPE}_$DATE" 
@@ -157,10 +152,10 @@ chmod o+rx $DOC_DIR
 
 # send doxygen output directory (formerly: html) to LSST doc website
 ssh $REMOTE_USER@$REMOTE_HOST mkdir -p $REMOTE_DIR/$DOC_DIR
-echo "CMD: scp -qr ${BUILD_DIR}/$SCM_LOCAL_DIR/$DOC_DIR  ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
-scp -qr ${BUILD_DIR}/$SCM_LOCAL_DIR/$DOC_DIR  ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}
+echo "CMD: scp -qr ${DOC_REPO_DIR}/$DOC_DIR  ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
+scp -qr ${DOC_REPO_DIR}/$DOC_DIR  ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}
 if [ $? != 0 ]; then
-    echo "*** Failed to copy doxygen documentation: ${BUILD_DIR}/$SCM_LOCAL_DIR/$DOC_DIR to ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
+    echo "*** Failed to copy doxygen documentation: ${DOC_REPO_DIR}/$DOC_DIR to ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
     exit $BUILDBOT_FAILURE
 fi
 echo "INFO: Doxygen documentation from \"$DOC_DIR\" copied to \"$DESTINATION/$DOC_DIR\""
