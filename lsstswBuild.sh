@@ -17,6 +17,7 @@ BUILD_NUMBER="0"
 REFS=""
 FAILED_LOGS="FailedLogs"
 BUILD_DOCS="yes"
+RUN_DEMO="yes"
 
 # Buildbot remotely invokes scripts with a stripped down environment.  
 umask 002
@@ -28,7 +29,7 @@ print_error() {
 }
 #---------------------------------------------------------------------------
 
-options=(getopt --long newbuild,builder_name:,build_number:,branch:,email,skip_docs: -- "$@")
+options=(getopt --long newbuild,builder_name:,build_number:,branch:,email,skip_docs,skip_demo: -- "$@")
 while true
 do
     case "$1" in
@@ -38,6 +39,7 @@ do
         --email)        EMAIL=$2          ; shift 2 ;;
         --newbuild)     NEW_BUILD="yes"   ; shift 1 ;;
         --skip_docs)    BUILD_DOCS="no"   ; shift 1 ;;
+        --skip_demo)    RUN_DEMO="no"     ; shift 1 ;;
         --) shift ; break ;;
         *) [ "$*" != "" ] && echo "Parsed options; arguments left are:$*:"
             break;;
@@ -173,17 +175,21 @@ od -bc ${BUILD_DIR}/BB_Last_Tag
 
 #=================================================================
 # Finally run a simple test of package integration
-echo "Start Demo run at: `date`"
-cd $BUILD_DIR
-${SCRIPT_DIR}/runManifestDemo.sh --builder_name $BUILDER_NAME --build_number $BUILD_NUMBER --tag $TAG  --small
-RET=$?
+if [ $RUN_DEMO == "yes" ]; then
+    echo "Start Demo run at: `date`"
+    cd $BUILD_DIR
+    ${SCRIPT_DIR}/runManifestDemo.sh --builder_name $BUILDER_NAME --build_number $BUILD_NUMBER --tag $TAG  --small
+    RET=$?
 
-if [ $RET -eq 2 ]; then
-    print_error "*** The simple integration demo completed with some statistical deviation in the output comparison."
-    exit $BUILDBOT_WARNING
-elif [ $RET -ne 0 ]; then
-    print_error "*** There was an error running the simple integration demo."
-    print_error "*** Review the Buildbot 'stdio' log for build: $BUILD_NUMBER."
-    exit $BUILDBOT_FAILURE
+    if [ $RET -eq 2 ]; then
+        print_error "*** The simple integration demo completed with some statistical deviation in the output comparison."
+        exit $BUILDBOT_WARNING
+    elif [ $RET -ne 0 ]; then
+        print_error "*** There was an error running the simple integration demo."
+        print_error "*** Review the Buildbot 'stdio' log for build: $BUILD_NUMBER."
+        exit $BUILDBOT_FAILURE
+    fi
+    echo "The simple integration demo was successfully run."
+else
+    echo "Skipping Demo."
 fi
-echo "The simple integration demo was successfully run."
