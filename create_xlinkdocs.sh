@@ -30,8 +30,7 @@ usage() {
 # % cd <your work dir>
 # % ~buildbot/RHEL6/scripts/create_xlinkdocs.sh --type master --user buildbot --host lsst-dev.ncsa.illinois.edu --path /lsst/home/buildbot/public_html/doxygen
 #----------------------------------------------------------------------------- 
-WORK_DIR=`pwd`
-echo "WORK_DIR: $WORK_DIR"
+echo "BUILD_DIR: $BUILD_DIR"
 
 options=(getopt --long type:,user:,host:,directory: -- "$@")
 while true
@@ -96,7 +95,7 @@ if [ $? != 0 ]; then
 fi
 
 # Ensure fresh extraction
-cd $WORK_DIR
+cd $BUILD_DIR
 rm -rf lsstDoxygen
 SCM_LOCAL_DIR=lsstDoxygen
 
@@ -137,7 +136,7 @@ eups list -s
 echo ""
 
 
-$WORK_DIR/$SCM_LOCAL_DIR/bin/makeDocs --nodot datarel $DATAREL_VERSION > MakeDocs.out
+${BUILD_DIR}/$SCM_LOCAL_DIR/bin/makeDocs --nodot datarel $DATAREL_VERSION > MakeDocs.out
 if [ $? != 0 ] ; then
     echo "*** Failed to generate complete makeDocs output for \"$DOXY_TYPE\" source."
     exit $BUILDBOT_FAILURE
@@ -149,7 +148,7 @@ if [ $? != 0 ] ; then
     exit $BUILDBOT_FAILURE
 fi
 
-cd $WORK_DIR/$SCM_LOCAL_DIR
+cd ${BUILD_DIR}/$SCM_LOCAL_DIR
 
 # rename the html directory 
 echo "Move the documentation into web position"
@@ -160,10 +159,10 @@ chmod o+rx $DOC_DIR
 
 # send doxygen output directory (formerly: html) to LSST doc website
 ssh $REMOTE_USER@$REMOTE_HOST mkdir -p $REMOTE_DIR/$DOC_DIR
-echo "CMD: scp -qr $WORK_DIR/$SCM_LOCAL_DIR/$DOC_DIR  ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
-scp -qr $WORK_DIR/$SCM_LOCAL_DIR/$DOC_DIR  ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}
+echo "CMD: scp -qr ${BUILD_DIR}/$SCM_LOCAL_DIR/$DOC_DIR  ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
+scp -qr ${BUILD_DIR}/$SCM_LOCAL_DIR/$DOC_DIR  ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}
 if [ $? != 0 ]; then
-    echo "*** Failed to copy doxygen documentation: $WORK_DIR/$SCM_LOCAL_DIR/$DOC_DIR to ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
+    echo "*** Failed to copy doxygen documentation: ${BUILD_DIR}/$SCM_LOCAL_DIR/$DOC_DIR to ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
     exit $BUILDBOT_FAILURE
 fi
 echo "INFO: Doxygen documentation from \"$DOC_DIR\" copied to \"$DESTINATION/$DOC_DIR\""

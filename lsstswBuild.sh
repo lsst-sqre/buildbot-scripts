@@ -27,8 +27,6 @@ print_error() {
 }
 #---------------------------------------------------------------------------
 
-WORK_DIR=`pwd`
-
 options=(getopt --long newbuild,builder_name:,build_number:,branch:,email: -- "$@")
 while true
 do
@@ -52,7 +50,7 @@ fi
 echo "BRANCH:$BRANCH:"
 
 export REF_LIST=`echo $BRANCH | sed  -e "s/ \+ / /g" -e "s/^/ /" -e "s/ $//" -e "s/ / -r /g"`
-echo "REF_LIST: $REF_LIST   pwd: $WORK_DIR    NEW_BUILD: $NEW_BUILD"
+echo "REF_LIST: $REF_LIST   BUILD_DIR: $BUILD_DIR    NEW_BUILD: $NEW_BUILD"
 
 if [ "$NEW_BUILD" !=  "no" ]; then
     print_error "This slave does not create new stacks. Contact your buildbot nanny."
@@ -62,9 +60,9 @@ fi
 # The display provides feedback on the environment existing prior to lsst_build
 printenv
 
-mkdir -p $LSSTSW/build/$FAILED_LOGS
+mkdir -p ${BUILD_DIR}/$FAILED_LOGS
 if [ $? -ne 0 ]; then
-    print_error "Failed prior to stack rebuild; user unable to write to directory: $LSSTSW/build/$FAILED_LOGS"
+    print_error "Failed prior to stack rebuild; user unable to write to directory: ${BUILD_DIR}/$FAILED_LOGS"
     exit $BUILDBOT_FAILURE
 fi
 
@@ -102,19 +100,19 @@ RET=$?
 #=================================================================
 
 # Set current build tag (also used as eups tag per installed package).
-eval "$(grep -E '^BUILD=' "$LSSTSW"/build/manifest.txt | sed -e 's/BUILD/TAG/')"
+eval "$(grep -E '^BUILD=' "$BUILD_DIR"/manifest.txt | sed -e 's/BUILD/TAG/')"
 
 BUILD_STATUS="success" && (( $RET != 0 )) && BUILD_STATUS="failure"
-echo "$TAG:$BUILD_NUMBER:$BUILD_STATUS:$BRANCH" >> $LSSTSW/build/eupsTag_buildbotNum
+echo "$TAG:$BUILD_NUMBER:$BUILD_STATUS:$BRANCH" >> ${BUILD_DIR}/eupsTag_buildbotNum
 
 if [ $RET -eq 0 ]; then
     print_error "The DM stack has been installed at $LSSTSW with tag: $TAG."
 else
     # Archive the failed build artifacts, if any found.
-    mkdir -p $LSSTSW/build/$FAILED_LOGS/$BUILD_NUMBER
-    for product in $LSSTSW/build/[[:lower:]]*/ ; do
+    mkdir -p ${BUILD_DIR}/$FAILED_LOGS/$BUILD_NUMBER
+    for product in ${BUILD_DIR}/[[:lower:]]*/ ; do
         PACKAGE=`echo $product | sed -e "s/^.*\/build\///"  -e "s/\///"`
-        PKG_FAIL_DIR=$LSSTSW/build/$FAILED_LOGS/$BUILD_NUMBER/${PACKAGE}/
+        PKG_FAIL_DIR=${BUILD_DIR}/$FAILED_LOGS/$BUILD_NUMBER/${PACKAGE}/
         # Are there failed tests?
         if [ -n "$(ls -A  $product/tests/.tests/*.failed 2> /dev/null)" ]; then
             mkdir -p  $PKG_FAIL_DIR
@@ -133,10 +131,10 @@ else
             done
         fi
     done
-    if [ "`ls -A $LSSTSW/build/$FAILED_LOGS/$BUILD_NUMBER`" != "" ]; then
+    if [ "`ls -A ${BUILD_DIR}/$FAILED_LOGS/$BUILD_NUMBER`" != "" ]; then
         print_error "Failed during rebuild of DM stack." 
-        echo "The following build artifacts are in directory: $LSSTSW/build/$FAILED_LOGS/$BUILD_NUMBER/"
-        ls $LSSTSW/build/$FAILED_LOGS/$BUILD_NUMBER/*
+        echo "The following build artifacts are in directory: ${BUILD_DIR}/$FAILED_LOGS/$BUILD_NUMBER/"
+        ls ${BUILD_DIR}/$FAILED_LOGS/$BUILD_NUMBER/*
     else
         print_error "Failed during setup prior to stack rebuild."
     fi
@@ -146,7 +144,7 @@ fi
 
 # Build doxygen documentation
 echo "Start Documentation build at: `date`"
-cd $LSSTSW/build
+cd $BUILD_DIR
 ${SCRIPT_DIR}/create_xlinkdocs.sh --type "master" --user "buildbot" --host "lsst-dev.ncsa.illinois.edu" --path "/lsst/home/buildbot/public_html/doxygen"
 RET=$?
 
@@ -164,13 +162,13 @@ echo "Doxygen Documentation was installed successfully."
 #=================================================================
 # Then the BB_LastTag file is updated since full processing completed 
 # successfully.
-echo -n $TAG >  $WORK_DIR/build/BB_Last_Tag
-od -bc $WORK_DIR/build/BB_Last_Tag
+echo -n $TAG >  ${BUILD_DIR}/BB_Last_Tag
+od -bc ${BUILD_DIR}/BB_Last_Tag
 
 #=================================================================
 # Finally run a simple test of package integration
 echo "Start Demo run at: `date`"
-cd $LSSTSW/build
+cd $BUILD_DIR
 ${SCRIPT_DIR}/runManifestDemo.sh --builder_name $BUILDER_NAME --build_number $BUILD_NUMBER --tag $TAG  --small
 RET=$?
 

@@ -74,8 +74,7 @@ do
 done
 
 
-cd ~lsstsw/build
-WORK_DIR=`pwd`
+cd $BUILD_DIR
 
 # Setup either requested tag or last successfully built lsst_distrib
 if [ -n "$TAG" ]; then
