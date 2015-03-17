@@ -124,7 +124,7 @@ fi
 # Build doxygen documentation
 if [ $BUILD_DOCS == "yes" ]; then
     echo "Start Documentation build at: `date`"
-    ${SCRIPT_DIR}/create_xlinkdocs.sh --type "master" --user "buildbot" --host "lsst-dev.ncsa.illinois.edu" --path "/lsst/home/buildbot/public_html/doxygen"
+    ${SCRIPT_DIR}/create_xlinkdocs.sh --type "master" --user $DOC_PUSH_USER --host $DOC_PUSH_HOST --path $DOC_PUSH_PATH
     RET=$?
 
     if [ $RET -eq 2 ]; then
