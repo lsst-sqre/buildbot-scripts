@@ -15,7 +15,6 @@ source ${LSSTSW}/bin/setup.sh
 NEW_BUILD="no"     
 BUILDER_NAME=""
 BUILD_NUMBER="0"
-REFS=""
 FAILED_LOGS="FailedLogs"
 BUILD_DOCS="yes"
 RUN_DEMO="yes"
@@ -30,14 +29,13 @@ print_error() {
 }
 #---------------------------------------------------------------------------
 
-options=(getopt --long newbuild,builder_name:,build_number:,branch:,email,skip_docs,skip_demo: -- "$@")
+options=(getopt --long newbuild,builder_name:,build_number:,branch:,skip_docs,skip_demo -- "$@")
 while true
 do
     case "$1" in
         --builder_name) BUILDER_NAME=$2   ; shift 2 ;;
         --build_number) BUILD_NUMBER="$2" ; shift 2 ;;
         --branch)       BRANCH=$2         ; shift 2 ;;
-        --email)        EMAIL=$2          ; shift 2 ;;
         --newbuild)     NEW_BUILD="yes"   ; shift 1 ;;
         --skip_docs)    BUILD_DOCS="no"   ; shift 1 ;;
         --skip_demo)    RUN_DEMO="no"     ; shift 1 ;;
@@ -79,29 +77,6 @@ fi
 echo "Rebuild is commencing....stand by; using $REF_LIST"
 ${LSSTSW}/bin/rebuild  $REF_LIST
 RET=$?
-
-#=================================================================
-# Following is necessary to test failures until a test package is fabricated 
-# for this very purpose.
-#  Case 1: uncomment all lines in following block - email sent to lsst-dm-dev
-#  Case 2: keep commented the lines with '***', and ':::::' -
-#          email sent only to Buildbot Nanny.
-# Remember to re-comment the entire following block when done testing.
-#=================================================================
-#echo "Now forcing failure in order to test Buildbot error email delivery"
-#echo "*** error building product meas_algorithms."
-#echo "*** exit code = 2"
-#echo "*** log is in /lsst/home/lsstsw/build/meas_algorithms/_build.log"
-#echo "ctrl_provenance: 8.0.0.0+3 ERROR forced"
-#echo ":::::  scons: *** [src/WarpedPsf.os] Error 1"
-#echo ":::::  scons: building terminated because of errors."
-#echo "*** This is a test of Buildbot error handling system."
-#echo "*** I G N O R E this missive."
-#echo "This is not an error line"
-#echo "::::: This concludes testing of Buildbot error handling for SCONS failures"
-#echo "::::: You may resume your normal activities."
-#exit $BUILDBOT_FAILURE
-#=================================================================
 
 # Set current build tag (also used as eups tag per installed package).
 eval "$(grep -E '^BUILD=' "$BUILD_DIR"/manifest.txt | sed -e 's/BUILD/TAG/')"
