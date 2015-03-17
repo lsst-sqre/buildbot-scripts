@@ -24,7 +24,6 @@ usage() {
     echo "                 --small : to use small dataset; otherwise a mini-production size will be used."
     echo "    --builder_name <name>: buildbot's build name assigned to run."
     echo "  --build_number <number>: buildbot's build number assigned to run."
-    echo "          --log_url <url>: URL for web-access to the build logs."
     echo "       --step_name <name>: assigned step name in build."
     exit
 }
@@ -37,13 +36,12 @@ print_error() {
 
 BUILDER_NAME=""
 BUILD_NUMBER=0
-LOG_URL=""
 STEP_NAME=""
 TAG=""
 SIZE=""
 SIZE_EXT=""
 
-options=$(getopt -l help,small,builder_name:,build_number:,tag:,log_url:,step_name: -- "$@")
+options=$(getopt -l help,small,builder_name:,build_number:,tag:,step_name: -- "$@")
 
 while true
 do
@@ -55,7 +53,6 @@ do
         --builder_name) BUILDER_NAME=$2; shift 2;;
         --build_number) BUILD_NUMBER=$2; shift 2;;
         --tag)          TAG=$2; shift 2;;
-        --log_url)      LOG_URL=$2; shift 2;;
         --step_name)    STEP_NAME=$2; shift 2;;
         --)             break ;;
         *)              [ "$*" != "" ] && usage;
