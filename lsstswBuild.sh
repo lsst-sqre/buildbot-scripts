@@ -52,17 +52,46 @@ if [ "${BRANCH}" == "None" ]; then
 else
     BRANCH="${BRANCH} master"
 fi
-echo "BRANCH:$BRANCH:"
 
 export REF_LIST=`echo $BRANCH | sed  -e "s/ \+ / /g" -e "s/^/ /" -e "s/ $//" -e "s/ / -r /g"`
-echo "REF_LIST: $REF_LIST   BUILD_DIR: $BUILD_DIR    NEW_BUILD: $NEW_BUILD"
+
 
 if [ "$NEW_BUILD" !=  "no" ]; then
     print_error "This slave does not create new stacks. Contact your buildbot nanny."
     exit $BUILDBOT_FAILURE
 fi
 
-# The display provides feedback on the environment existing prior to lsst_build
+# print "settings"
+
+settings=(
+    BUILDER_NAME
+    BUILD_NUMBER
+    BRANCH
+    PRODUCT
+    NEW_BUILD
+    BUILD_DOCS
+    RUN_DEMO
+    REF_LIST
+    LSSTSW
+    BUILD_DIR
+    DOC_PUSH_USER
+    DOC_PUSH_HOST
+    DOC_PUSH_PATH
+    DOC_REPO_URL
+    DOC_REPO_NAME
+    DOC_REPO_DIR
+    DEMO_ROOT
+    DEMO_TGZ
+)
+
+for i in ${settings[*]}
+do
+    eval echo "${i}: " \$$i
+done
+
+# print the "env"
+echo ""
+echo "### ENV ###"
 printenv
 
 mkdir -p ${BUILD_DIR}/$FAILED_LOGS
