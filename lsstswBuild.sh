@@ -18,6 +18,7 @@ BUILD_NUMBER="0"
 FAILED_LOGS="FailedLogs"
 BUILD_DOCS="yes"
 RUN_DEMO="yes"
+PRODUCT=""
 
 # Buildbot remotely invokes scripts with a stripped down environment.  
 umask 002
@@ -29,13 +30,14 @@ print_error() {
 }
 #---------------------------------------------------------------------------
 
-options=(getopt --long newbuild,builder_name:,build_number:,branch:,skip_docs,skip_demo -- "$@")
+options=(getopt --long newbuild,builder_name:,build_number:,branch:,product,skip_docs,skip_demo -- "$@")
 while true
 do
     case "$1" in
         --builder_name) BUILDER_NAME=$2   ; shift 2 ;;
         --build_number) BUILD_NUMBER="$2" ; shift 2 ;;
         --branch)       BRANCH=$2         ; shift 2 ;;
+        --product)      PRODUCT=$2        ; shift 2 ;;
         --newbuild)     NEW_BUILD="yes"   ; shift 1 ;;
         --skip_docs)    BUILD_DOCS="no"   ; shift 1 ;;
         --skip_demo)    RUN_DEMO="no"     ; shift 1 ;;
@@ -75,7 +77,7 @@ if [ ! -f ${LSSTSW}/bin/rebuild ]; then
      exit $BUILDBOT_FAILURE
 fi
 echo "Rebuild is commencing....stand by; using $REF_LIST"
-${LSSTSW}/bin/rebuild  $REF_LIST
+${LSSTSW}/bin/rebuild $REF_LIST $PRODUCT
 RET=$?
 
 # Set current build tag (also used as eups tag per installed package).
