@@ -85,10 +85,10 @@ if [ -z  "$PIPE_TASKS_DIR" -o -z "$OBS_SDSS_DIR" ]; then
 fi
 
 # Acquire and Load the demo package in buildbot work directory
-echo "curl -ko $DEMO_TGZ $DEMO_ROOT/$DEMO_TGZ"
-curl -ko $DEMO_TGZ $DEMO_ROOT/$DEMO_TGZ
+echo "curl -kLo $DEMO_TGZ $DEMO_ROOT"
+curl -kLo $DEMO_TGZ $DEMO_ROOT
 if [ ! -f $DEMO_TGZ ]; then
-    print_error "*** Failed to acquire demo from: $DEMO_ROOT/$DEMO_TGZ  ."
+    print_error "*** Failed to acquire demo from: $DEMO_ROOT."
     exit $BUILDBOT_FAILURE
 fi
 

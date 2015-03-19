@@ -20,5 +20,5 @@ DOC_REPO_NAME=${DOC_REPO_NAME:-"lsstDoxygen"}
 DOC_REPO_DIR=${DOC_REPO_DIR:-"${BUILD_DIR}/${DOC_REPO_NAME}"}
 
 # runManifestDemo.sh
-DEMO_ROOT=${DEMO_ROOT:-"https://dev.lsstcorp.org/cgit/contrib/demos/lsst_dm_stack_demo.git/snapshot"}
+DEMO_ROOT=${DEMO_ROOT:-"https://github.com/lsst/lsst_dm_stack_demo/archive/master.tar.gz"}
 DEMO_TGZ=${DEMO_TGZ:-"lsst_dm_stack_demo-master.tar.gz"}
