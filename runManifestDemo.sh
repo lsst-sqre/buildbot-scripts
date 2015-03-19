@@ -119,8 +119,8 @@ j=1
 NEWCOLUMNS=`for i in $COLUMNS; do echo -n "$j:$i "; j=$((j+1)); done`
 echo "Columns in benchmark datafile:"
 echo $NEWCOLUMNS
-echo "${SCRIPT_DIR}/numdiff/bin/numdiff -# 11 detected-sources$SIZE_EXT.txt.expected detected-sources$SIZE_EXT.txt"
-${SCRIPT_DIR}/numdiff/bin/numdiff -# 11 detected-sources$SIZE_EXT.txt.expected detected-sources$SIZE_EXT.txt
+echo "${LSSTSW}/lfs/bin/numdiff -# 11 detected-sources$SIZE_EXT.txt.expected detected-sources$SIZE_EXT.txt"
+${LSSTSW}/lfs/bin/numdiff -# 11 detected-sources$SIZE_EXT.txt.expected detected-sources$SIZE_EXT.txt
 if  [ $? != 0 ]; then
     print_error "*** Warning: output results not within error tolerance for: $DEMO_BASENAME"
     exit $BUILDBOT_WARNING
