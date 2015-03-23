@@ -27,11 +27,9 @@ usage() {
     exit
 }
 
-# print to stderr -  Assumes stderr is fd 2. BB prints stderr in red.
 print_error() {
-    echo $@ > /proc/self/fd/2
+    >&2 echo $@
 }
-#--------------------------------------------------------------------------
 
 BUILDER_NAME=""
 BUILD_NUMBER=0

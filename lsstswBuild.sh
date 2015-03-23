@@ -23,12 +23,9 @@ PRODUCT=""
 # Buildbot remotely invokes scripts with a stripped down environment.  
 umask 002
 
-#---------------------------------------------------------------------------
-# print to stderr -  Assumes stderr is fd 2. BB prints stderr in red.
 print_error() {
-    echo $@ > /proc/self/fd/2
+    >&2 echo $@
 }
-#---------------------------------------------------------------------------
 
 options=(getopt --long newbuild,builder_name:,build_number:,branch:,product,skip_docs,skip_demo -- "$@")
 while true
