@@ -12,7 +12,6 @@ source ${SCRIPT_DIR}/settings.cfg.sh
 source ${LSSTSW}/bin/setup.sh
 
 # Reuse an existing lsstsw installation
-BUILDER_NAME=""
 BUILD_NUMBER="0"
 FAILED_LOGS="FailedLogs"
 BUILD_DOCS="yes"
@@ -26,11 +25,10 @@ print_error() {
     >&2 echo $@
 }
 
-options=(getopt --long builder_name:,build_number:,branch:,product,skip_docs,skip_demo -- "$@")
+options=(getopt --long build_number:,branch:,product,skip_docs,skip_demo -- "$@")
 while true
 do
     case "$1" in
-        --builder_name) BUILDER_NAME=$2   ; shift 2 ;;
         --build_number) BUILD_NUMBER="$2" ; shift 2 ;;
         --branch)       BRANCH=$2         ; shift 2 ;;
         --product)      PRODUCT=$2        ; shift 2 ;;
@@ -53,7 +51,6 @@ export REF_LIST=`echo $BRANCH | sed  -e "s/ \+ / /g" -e "s/^/ /" -e "s/ $//" -e 
 # print "settings"
 
 settings=(
-    BUILDER_NAME
     BUILD_NUMBER
     BRANCH
     PRODUCT
@@ -170,7 +167,7 @@ od -bc ${BUILD_DIR}/BB_Last_Tag
 # Finally run a simple test of package integration
 if [ $RUN_DEMO == "yes" ]; then
     echo "Start Demo run at: `date`"
-    ${SCRIPT_DIR}/runManifestDemo.sh --builder_name $BUILDER_NAME --build_number $BUILD_NUMBER --tag $TAG  --small
+    ${SCRIPT_DIR}/runManifestDemo.sh --build_number $BUILD_NUMBER --tag $TAG  --small
     RET=$?
 
     if [ $RET -eq 2 ]; then

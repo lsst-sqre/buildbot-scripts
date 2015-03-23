@@ -10,9 +10,9 @@ source ${LSSTSW}/bin/setup.sh
 #--------------------------------------------------------------------------
 # First: setup lsstsw stack
 # cd $lsstsw/build
-# /lsst/home/buildbot/RHEL6/scripts/runManifestDemo.sh  --builder_name "Dunno" --build_number "1"  --small
+# /lsst/home/buildbot/RHEL6/scripts/runManifestDemo.sh --build_number "1"  --small
 # or
-# /lsst/home/buildbot/RHEL6/scripts/runManifestDemo.sh  --builder_name "Dunno" --build_number "1"  
+# /lsst/home/buildbot/RHEL6/scripts/runManifestDemo.sh --build_number "1"
 
 #--------------------------------------------------------------------------
 usage() {
@@ -22,7 +22,6 @@ usage() {
     echo "Options:"
     echo "              --tag <id> : eups-tag for eups-setup or defaults to latest master build."
     echo "                 --small : to use small dataset; otherwise a mini-production size will be used."
-    echo "    --builder_name <name>: buildbot's build name assigned to run."
     echo "  --build_number <number>: buildbot's build number assigned to run."
     exit
 }
@@ -31,13 +30,12 @@ print_error() {
     >&2 echo $@
 }
 
-BUILDER_NAME=""
 BUILD_NUMBER=0
 TAG=""
 SIZE=""
 SIZE_EXT=""
 
-options=$(getopt -l help,small,builder_name:,build_number:,tag: -- "$@")
+options=$(getopt -l help,small,build_number:,tag: -- "$@")
 
 while true
 do
@@ -46,7 +44,6 @@ do
         --small)        SIZE="small";
                         SIZE_EXT="_small"; 
                         shift 1;;
-        --builder_name) BUILDER_NAME=$2; shift 2;;
         --build_number) BUILD_NUMBER=$2; shift 2;;
         --tag)          TAG=$2; shift 2;;
         --)             break ;;
@@ -70,7 +67,7 @@ fi
 #*************************************************************************
 echo "----------------------------------------------------------------"
 echo "EUPS-tag: $TAG     Version: $VERSION"
-echo "BUILDER_NAME: $BUILDER_NAME    BUILD_NUMBER: $BUILD_NUMBER"
+echo "BUILD_NUMBER: $BUILD_NUMBER"
 echo "Dataset size: $SIZE"
 echo "Current `umask -p`"
 echo "Setup lsst_distrib "
