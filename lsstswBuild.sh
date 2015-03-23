@@ -12,7 +12,6 @@ source ${SCRIPT_DIR}/settings.cfg.sh
 source ${LSSTSW}/bin/setup.sh
 
 # Reuse an existing lsstsw installation
-NEW_BUILD="no"     
 BUILDER_NAME=""
 BUILD_NUMBER="0"
 FAILED_LOGS="FailedLogs"
@@ -27,7 +26,7 @@ print_error() {
     >&2 echo $@
 }
 
-options=(getopt --long newbuild,builder_name:,build_number:,branch:,product,skip_docs,skip_demo -- "$@")
+options=(getopt --long builder_name:,build_number:,branch:,product,skip_docs,skip_demo -- "$@")
 while true
 do
     case "$1" in
@@ -35,7 +34,6 @@ do
         --build_number) BUILD_NUMBER="$2" ; shift 2 ;;
         --branch)       BRANCH=$2         ; shift 2 ;;
         --product)      PRODUCT=$2        ; shift 2 ;;
-        --newbuild)     NEW_BUILD="yes"   ; shift 1 ;;
         --skip_docs)    BUILD_DOCS="no"   ; shift 1 ;;
         --skip_demo)    RUN_DEMO="no"     ; shift 1 ;;
         --) shift ; break ;;
@@ -52,12 +50,6 @@ fi
 
 export REF_LIST=`echo $BRANCH | sed  -e "s/ \+ / /g" -e "s/^/ /" -e "s/ $//" -e "s/ / -r /g"`
 
-
-if [ "$NEW_BUILD" !=  "no" ]; then
-    print_error "This slave does not create new stacks. Contact your buildbot nanny."
-    exit $BUILDBOT_FAILURE
-fi
-
 # print "settings"
 
 settings=(
@@ -65,7 +57,6 @@ settings=(
     BUILD_NUMBER
     BRANCH
     PRODUCT
-    NEW_BUILD
     BUILD_DOCS
     RUN_DEMO
     REF_LIST
