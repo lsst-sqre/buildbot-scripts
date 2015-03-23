@@ -167,7 +167,7 @@ od -bc ${BUILD_DIR}/BB_Last_Tag
 # Finally run a simple test of package integration
 if [ $RUN_DEMO == "yes" ]; then
     echo "Start Demo run at: `date`"
-    ${SCRIPT_DIR}/runManifestDemo.sh --build_number $BUILD_NUMBER --tag $TAG  --small
+    ${SCRIPT_DIR}/runManifestDemo.sh --tag $TAG  --small
     RET=$?
 
     if [ $RET -eq 2 ]; then
