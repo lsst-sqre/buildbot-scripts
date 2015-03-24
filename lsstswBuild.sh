@@ -17,6 +17,7 @@ FAILED_LOGS="FailedLogs"
 BUILD_DOCS="yes"
 RUN_DEMO="yes"
 PRODUCT=""
+NO_FETCH=0
 
 # Buildbot remotely invokes scripts with a stripped down environment.  
 umask 002
@@ -34,6 +35,7 @@ do
         --product)      PRODUCT=$2        ; shift 2 ;;
         --skip_docs)    BUILD_DOCS="no"   ; shift 1 ;;
         --skip_demo)    RUN_DEMO="no"     ; shift 1 ;;
+        --no-fetch)     NO_FETCH=1        ; shift 1 ;;
         --) shift ; break ;;
         *) [ "$*" != "" ] && echo "Parsed options; arguments left are:$*:"
             break;;
@@ -56,6 +58,7 @@ settings=(
     PRODUCT
     BUILD_DOCS
     RUN_DEMO
+    NO_FETCH
     REF_LIST
     LSSTSW
     BUILD_DIR
@@ -91,8 +94,15 @@ if [ ! -f ${LSSTSW}/bin/rebuild ]; then
      exit $BUILDBOT_FAILURE
 fi
 echo "Rebuild is commencing....stand by; using $REF_LIST"
-${LSSTSW}/bin/rebuild $REF_LIST $PRODUCT
-RET=$?
+
+RET=0
+if [ $NO_FETCH -eq 1 ]; then
+    ${LSSTSW}/bin/rebuild -n $REF_LIST $PRODUCT
+    RET=$?
+else
+    ${LSSTSW}/bin/rebuild $REF_LIST $PRODUCT
+    RET=$?
+fi
 
 # Set current build tag (also used as eups tag per installed package).
 eval "$(grep -E '^BUILD=' "$BUILD_DIR"/manifest.txt | sed -e 's/BUILD/TAG/')"
