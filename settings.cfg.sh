@@ -1,8 +1,8 @@
 #! /bin/bash
 
 # general
-LSSTSW=${LSSTSW:-$HOME}
-BUILD_DIR=${BUILD_DIR:-"${HOME}/build"}
+LSSTSW=${LSSTSW:-$HOME/lsstsw}
+BUILD_DIR=${BUILD_DIR:-${LSSTSW}/build}
 
 BUILDBOT_SUCCESS=0
 BUILDBOT_FAILURE=1
