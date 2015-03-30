@@ -26,7 +26,7 @@ print_error() {
     >&2 echo $@
 }
 
-options=(getopt --long build_number:,branch:,product,skip_docs,skip_demo -- "$@")
+options=(getopt --long build_number:,branch:,product:,skip_docs,skip_demo,no-fetch -- "$@")
 while true
 do
     case "$1" in
@@ -37,8 +37,8 @@ do
         --skip_demo)    RUN_DEMO="no"     ; shift 1 ;;
         --no-fetch)     NO_FETCH=1        ; shift 1 ;;
         --) shift ; break ;;
-        *) [ "$*" != "" ] && echo "Parsed options; arguments left are:$*:"
-            break;;
+        *) [ "$*" != "" ] && echo "Unknown option: $1" && exit 1
+           break;;
     esac
 done
 
