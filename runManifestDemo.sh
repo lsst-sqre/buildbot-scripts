@@ -22,7 +22,7 @@ usage() {
     echo "Options:"
     echo "              --tag <id> : eups-tag for eups-setup or defaults to latest master build."
     echo "                 --small : to use small dataset; otherwise a mini-production size will be used."
-    exit
+    exit $BUILDBOT_FAILURE
 }
 
 print_error() {

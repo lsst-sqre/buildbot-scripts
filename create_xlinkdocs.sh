@@ -15,6 +15,7 @@ usage() {
     echo "Example: $0 --type master --user buildbot --host lsst-dev.ncsa.illinois.edu --path /lsst/home/buildbot/public_html/doxygen"
     echo "Example: $0 --type Winter2012 --user buildbot --host lsst-dev.ncsa.illinois.edu --path /lsst/home/buildbot/public_html/doxygen"
     echo "Example: $0 --type stable --user buildbot --host lsst-dev.ncsa.illinois.edu --path /lsst/home/buildbot/public_html/doxygen"
+    exit $BUILDBOT_FAILURE
 }
 
 #----------------------------------------------------------------------------- 

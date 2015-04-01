@@ -37,7 +37,7 @@ do
         --skip_demo)    RUN_DEMO="no"     ; shift 1 ;;
         --no-fetch)     NO_FETCH=1        ; shift 1 ;;
         --) shift ; break ;;
-        *) [ "$*" != "" ] && echo "Unknown option: $1" && exit 1
+        *) [ "$*" != "" ] && echo "Unknown option: $1" && exit $BUILDBOT_FAILURE
            break;;
     esac
 done
