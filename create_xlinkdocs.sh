@@ -29,7 +29,7 @@ usage() {
 # % cd <your work dir>
 # % ~buildbot/RHEL6/scripts/create_xlinkdocs.sh --type master --user buildbot --host lsst-dev.ncsa.illinois.edu --path /lsst/home/buildbot/public_html/doxygen
 #----------------------------------------------------------------------------- 
-echo "BUILD_DIR: $BUILD_DIR"
+echo "LSSTSW_BUILD_DIR: $LSSTSW_BUILD_DIR"
 
 options=(getopt --long type:,user:,host:,directory: -- "$@")
 while true

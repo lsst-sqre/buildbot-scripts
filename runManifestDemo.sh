@@ -50,7 +50,7 @@ do
 done
 
 
-cd $BUILD_DIR
+cd $LSSTSW_BUILD_DIR
 
 # Setup either requested tag or last successfully built lsst_distrib
 if [ -n "$TAG" ]; then
