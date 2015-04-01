@@ -12,38 +12,33 @@ source ${SCRIPT_DIR}/settings.cfg.sh
 source ${LSSTSW}/bin/setup.sh
 
 # Reuse an existing lsstsw installation
-NEW_BUILD="no"     
-BUILDER_NAME=""
 BUILD_NUMBER="0"
 FAILED_LOGS="FailedLogs"
 BUILD_DOCS="yes"
 RUN_DEMO="yes"
 PRODUCT=""
+NO_FETCH=0
 
 # Buildbot remotely invokes scripts with a stripped down environment.  
 umask 002
 
-#---------------------------------------------------------------------------
-# print to stderr -  Assumes stderr is fd 2. BB prints stderr in red.
 print_error() {
-    echo $@ > /proc/self/fd/2
+    >&2 echo $@
 }
-#---------------------------------------------------------------------------
 
-options=(getopt --long newbuild,builder_name:,build_number:,branch:,product,skip_docs,skip_demo -- "$@")
+options=(getopt --long build_number:,branch:,product:,skip_docs,skip_demo,no-fetch -- "$@")
 while true
 do
     case "$1" in
-        --builder_name) BUILDER_NAME=$2   ; shift 2 ;;
         --build_number) BUILD_NUMBER="$2" ; shift 2 ;;
         --branch)       BRANCH=$2         ; shift 2 ;;
         --product)      PRODUCT=$2        ; shift 2 ;;
-        --newbuild)     NEW_BUILD="yes"   ; shift 1 ;;
         --skip_docs)    BUILD_DOCS="no"   ; shift 1 ;;
         --skip_demo)    RUN_DEMO="no"     ; shift 1 ;;
+        --no-fetch)     NO_FETCH=1        ; shift 1 ;;
         --) shift ; break ;;
-        *) [ "$*" != "" ] && echo "Parsed options; arguments left are:$*:"
-            break;;
+        *) [ "$*" != "" ] && echo "Unknown option: $1" && exit 1
+           break;;
     esac
 done
 
@@ -55,22 +50,15 @@ fi
 
 export REF_LIST=`echo $BRANCH | sed  -e "s/ \+ / /g" -e "s/^/ /" -e "s/ $//" -e "s/ / -r /g"`
 
-
-if [ "$NEW_BUILD" !=  "no" ]; then
-    print_error "This slave does not create new stacks. Contact your buildbot nanny."
-    exit $BUILDBOT_FAILURE
-fi
-
 # print "settings"
 
 settings=(
-    BUILDER_NAME
     BUILD_NUMBER
     BRANCH
     PRODUCT
-    NEW_BUILD
     BUILD_DOCS
     RUN_DEMO
+    NO_FETCH
     REF_LIST
     LSSTSW
     BUILD_DIR
@@ -106,8 +94,15 @@ if [ ! -f ${LSSTSW}/bin/rebuild ]; then
      exit $BUILDBOT_FAILURE
 fi
 echo "Rebuild is commencing....stand by; using $REF_LIST"
-${LSSTSW}/bin/rebuild $REF_LIST $PRODUCT
-RET=$?
+
+RET=0
+if [ $NO_FETCH -eq 1 ]; then
+    ${LSSTSW}/bin/rebuild -n $REF_LIST $PRODUCT
+    RET=$?
+else
+    ${LSSTSW}/bin/rebuild $REF_LIST $PRODUCT
+    RET=$?
+fi
 
 # Set current build tag (also used as eups tag per installed package).
 eval "$(grep -E '^BUILD=' "$BUILD_DIR"/manifest.txt | sed -e 's/BUILD/TAG/')"
@@ -182,7 +177,7 @@ od -bc ${BUILD_DIR}/BB_Last_Tag
 # Finally run a simple test of package integration
 if [ $RUN_DEMO == "yes" ]; then
     echo "Start Demo run at: `date`"
-    ${SCRIPT_DIR}/runManifestDemo.sh --builder_name $BUILDER_NAME --build_number $BUILD_NUMBER --tag $TAG  --small
+    ${SCRIPT_DIR}/runManifestDemo.sh --tag $TAG  --small
     RET=$?
 
     if [ $RET -eq 2 ]; then
