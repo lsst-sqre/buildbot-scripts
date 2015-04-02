@@ -1,7 +1,7 @@
 #! /bin/bash
 # Run the demo code to test DM algorithms
 
-SCRIPT_DIR=${0%/*}
+SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 source ${SCRIPT_DIR}/settings.cfg.sh
 source ${LSSTSW}/bin/setup.sh
 
@@ -22,7 +22,7 @@ usage() {
     echo "Options:"
     echo "              --tag <id> : eups-tag for eups-setup or defaults to latest master build."
     echo "                 --small : to use small dataset; otherwise a mini-production size will be used."
-    exit
+    exit $BUILDBOT_FAILURE
 }
 
 print_error() {
@@ -50,7 +50,7 @@ do
 done
 
 
-cd $BUILD_DIR
+cd $LSSTSW_BUILD_DIR
 
 # Setup either requested tag or last successfully built lsst_distrib
 if [ -n "$TAG" ]; then

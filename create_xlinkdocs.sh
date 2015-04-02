@@ -1,7 +1,7 @@
 #! /bin/bash
 # Build cross linked doxygen documents and load into buildbot public_html website
 
-SCRIPT_DIR=${0%/*}
+SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 source ${SCRIPT_DIR}/settings.cfg.sh
 source ${LSSTSW}/bin/setup.sh
 
@@ -15,6 +15,7 @@ usage() {
     echo "Example: $0 --type master --user buildbot --host lsst-dev.ncsa.illinois.edu --path /lsst/home/buildbot/public_html/doxygen"
     echo "Example: $0 --type Winter2012 --user buildbot --host lsst-dev.ncsa.illinois.edu --path /lsst/home/buildbot/public_html/doxygen"
     echo "Example: $0 --type stable --user buildbot --host lsst-dev.ncsa.illinois.edu --path /lsst/home/buildbot/public_html/doxygen"
+    exit $BUILDBOT_FAILURE
 }
 
 #----------------------------------------------------------------------------- 
@@ -28,7 +29,7 @@ usage() {
 # % cd <your work dir>
 # % ~buildbot/RHEL6/scripts/create_xlinkdocs.sh --type master --user buildbot --host lsst-dev.ncsa.illinois.edu --path /lsst/home/buildbot/public_html/doxygen
 #----------------------------------------------------------------------------- 
-echo "BUILD_DIR: $BUILD_DIR"
+echo "LSSTSW_BUILD_DIR: $LSSTSW_BUILD_DIR"
 
 options=(getopt --long type:,user:,host:,directory: -- "$@")
 while true

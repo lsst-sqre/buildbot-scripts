@@ -7,7 +7,7 @@
 #  expectations regarding the 'work' directory location are  equivalent.
 # /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 
-SCRIPT_DIR=${0%/*}
+SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 source ${SCRIPT_DIR}/settings.cfg.sh
 source ${LSSTSW}/bin/setup.sh
 
@@ -37,7 +37,7 @@ do
         --skip_demo)    RUN_DEMO="no"     ; shift 1 ;;
         --no-fetch)     NO_FETCH=1        ; shift 1 ;;
         --) shift ; break ;;
-        *) [ "$*" != "" ] && echo "Unknown option: $1" && exit 1
+        *) [ "$*" != "" ] && echo "Unknown option: $1" && exit $BUILDBOT_FAILURE
            break;;
     esac
 done
@@ -48,7 +48,7 @@ else
     BRANCH="${BRANCH} master"
 fi
 
-export REF_LIST=`echo $BRANCH | sed  -e "s/ \+ / /g" -e "s/^/ /" -e "s/ $//" -e "s/ / -r /g"`
+REF_LIST=`echo $BRANCH | sed  -e "s/ \+ / /g" -e "s/^/ /" -e "s/ $//" -e "s/ / -r /g"`
 
 # print "settings"
 
@@ -61,7 +61,7 @@ settings=(
     NO_FETCH
     REF_LIST
     LSSTSW
-    BUILD_DIR
+    LSSTSW_BUILD_DIR
     DOC_PUSH_USER
     DOC_PUSH_HOST
     DOC_PUSH_PATH
@@ -82,9 +82,9 @@ echo ""
 echo "### ENV ###"
 printenv
 
-mkdir -p ${BUILD_DIR}/$FAILED_LOGS
+mkdir -p ${LSSTSW_BUILD_DIR}/$FAILED_LOGS
 if [ $? -ne 0 ]; then
-    print_error "Failed prior to stack rebuild; user unable to write to directory: ${BUILD_DIR}/$FAILED_LOGS"
+    print_error "Failed prior to stack rebuild; user unable to write to directory: ${LSSTSW_BUILD_DIR}/$FAILED_LOGS"
     exit $BUILDBOT_FAILURE
 fi
 
@@ -105,19 +105,19 @@ else
 fi
 
 # Set current build tag (also used as eups tag per installed package).
-eval "$(grep -E '^BUILD=' "$BUILD_DIR"/manifest.txt | sed -e 's/BUILD/TAG/')"
+eval "$(grep -E '^BUILD=' "$LSSTSW_BUILD_DIR"/manifest.txt | sed -e 's/BUILD/TAG/')"
 
 BUILD_STATUS="success" && (( $RET != 0 )) && BUILD_STATUS="failure"
-echo "$TAG:$BUILD_NUMBER:$BUILD_STATUS:$BRANCH" >> ${BUILD_DIR}/eupsTag_buildbotNum
+echo "$TAG:$BUILD_NUMBER:$BUILD_STATUS:$BRANCH" >> ${LSSTSW_BUILD_DIR}/eupsTag_buildbotNum
 
 if [ $RET -eq 0 ]; then
     print_error "The DM stack has been installed at $LSSTSW with tag: $TAG."
 else
     # Archive the failed build artifacts, if any found.
-    mkdir -p ${BUILD_DIR}/$FAILED_LOGS/$BUILD_NUMBER
-    for product in ${BUILD_DIR}/[[:lower:]]*/ ; do
+    mkdir -p ${LSSTSW_BUILD_DIR}/$FAILED_LOGS/$BUILD_NUMBER
+    for product in ${LSSTSW_BUILD_DIR}/[[:lower:]]*/ ; do
         PACKAGE=`echo $product | sed -e "s/^.*\/build\///"  -e "s/\///"`
-        PKG_FAIL_DIR=${BUILD_DIR}/$FAILED_LOGS/$BUILD_NUMBER/${PACKAGE}/
+        PKG_FAIL_DIR=${LSSTSW_BUILD_DIR}/$FAILED_LOGS/$BUILD_NUMBER/${PACKAGE}/
         # Are there failed tests?
         if [ -n "$(ls -A  $product/tests/.tests/*.failed 2> /dev/null)" ]; then
             mkdir -p  $PKG_FAIL_DIR
@@ -136,10 +136,10 @@ else
             done
         fi
     done
-    if [ "`ls -A ${BUILD_DIR}/$FAILED_LOGS/$BUILD_NUMBER`" != "" ]; then
+    if [ "`ls -A ${LSSTSW_BUILD_DIR}/$FAILED_LOGS/$BUILD_NUMBER`" != "" ]; then
         print_error "Failed during rebuild of DM stack." 
-        echo "The following build artifacts are in directory: ${BUILD_DIR}/$FAILED_LOGS/$BUILD_NUMBER/"
-        ls ${BUILD_DIR}/$FAILED_LOGS/$BUILD_NUMBER/*
+        echo "The following build artifacts are in directory: ${LSSTSW_BUILD_DIR}/$FAILED_LOGS/$BUILD_NUMBER/"
+        ls ${LSSTSW_BUILD_DIR}/$FAILED_LOGS/$BUILD_NUMBER/*
     else
         print_error "Failed during setup prior to stack rebuild."
     fi
@@ -170,8 +170,8 @@ fi
 #=================================================================
 # Then the BB_LastTag file is updated since full processing completed 
 # successfully.
-echo -n $TAG >  ${BUILD_DIR}/BB_Last_Tag
-od -bc ${BUILD_DIR}/BB_Last_Tag
+echo -n $TAG >  ${LSSTSW_BUILD_DIR}/BB_Last_Tag
+od -bc ${LSSTSW_BUILD_DIR}/BB_Last_Tag
 
 #=================================================================
 # Finally run a simple test of package integration
