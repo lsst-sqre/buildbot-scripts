@@ -60,13 +60,13 @@ DESTINATION="$REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR"
 #   for a master build
 NORMATIVE_DOXY_TYPE=`echo $DOXY_TYPE | tr  "/" "_"`
 if [ "$DOXY_TYPE" == "master" ]; then
-    BUILD_NUM="b"`eups list --raw lsst_distrib | sed -e "s/^.*|//" | sed -e "s/:/\n/g" | sed -e "s/^b//" | grep "^[0-9]" | sort -nr | head -1`
-    echo "BUILD_NUM: $BUILD_NUM"
-    if [ -z "$BUILD_NUM" ]; then
+    eval "$(grep -E '^BUILD=' "$LSSTSW_BUILD_DIR"/manifest.txt)"
+    echo "BUILD: $BUILD"
+    if [ -z "$BUILD" ]; then
         echo "*** Failed: to determine most recent master build number."
         exit $BUILDBOT_FAILURE
     else
-        DOXY_TYPE=$BUILD_NUM
+        DOXY_TYPE=$BUILD
     fi
 fi
 SYM_LINK="x_${NORMATIVE_DOXY_TYPE}DoxyDoc"
