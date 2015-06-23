@@ -10,9 +10,9 @@ source ${LSSTSW}/bin/setup.sh
 #--------------------------------------------------------------------------
 # First: setup lsstsw stack
 # cd $lsstsw/build
-# /lsst/home/buildbot/RHEL6/scripts/runManifestDemo.sh --small
+# ./runManifestDemo.sh --small
 # or
-# /lsst/home/buildbot/RHEL6/scripts/runManifestDemo.sh
+# ./runManifestDemo.sh
 
 #--------------------------------------------------------------------------
 usage() {
@@ -52,21 +52,21 @@ done
 
 cd $LSSTSW_BUILD_DIR
 
-# Setup either requested tag or last successfully built lsst_distrib
+# Setup either requested tag or last successfully built lsst_apps
 if [ -n "$TAG" ]; then
-    setup -t $TAG lsst_distrib 
+    setup -t $TAG lsst_apps
 else
-    setup -j lsst_distrib
-    cd $LSST_DISTRIB_DIR/../
+    setup -j lsst_apps
+    cd $LSST_APPS_DIR/../
     VERSION=`ls | sort -r -n -t+ +1 -2 | head -1`
-    setup lsst_distrib $VERSION
+    setup lsst_apps $VERSION
 fi
 #*************************************************************************
 echo "----------------------------------------------------------------"
 echo "EUPS-tag: $TAG     Version: $VERSION"
 echo "Dataset size: $SIZE"
 echo "Current `umask -p`"
-echo "Setup lsst_distrib "
+echo "Setup lsst_apps"
 eups list  -s
 echo "-----------------------------------------------------------------"
 
