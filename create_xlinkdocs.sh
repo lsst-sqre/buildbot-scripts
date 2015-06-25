@@ -18,17 +18,17 @@ usage() {
     exit $BUILDBOT_FAILURE
 }
 
-#----------------------------------------------------------------------------- 
-#                         W A R N I N G  
+#-----------------------------------------------------------------------------
+#                         W A R N I N G
 # The following test process will install the documentation of latest master build
 # into ~buildbot/public_html/doxygen .
-#                         W A R N I N G  
-#  To manually invoke this buildbot script,  you need to have your ssh public 
+#                         W A R N I N G
+#  To manually invoke this buildbot script,  you need to have your ssh public
 #  key installed in ~buildbot/.ssh/authorized_keys  and then do:
 # % <setup eups>
 # % cd <your work dir>
 # % ~buildbot/RHEL6/scripts/create_xlinkdocs.sh --type master --user buildbot --host lsst-dev.ncsa.illinois.edu --path /lsst/home/buildbot/public_html/doxygen
-#----------------------------------------------------------------------------- 
+#-----------------------------------------------------------------------------
 echo "LSSTSW_BUILD_DIR: $LSSTSW_BUILD_DIR"
 
 options=(getopt --long type:,user:,host:,directory: -- "$@")
@@ -56,7 +56,7 @@ DATE="`date +%Y`_`date +%m`_`date +%d`_`date +%H.%M.%S`"
 DESTINATION="$REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR"
 
 # Normative doxy_type needs to be one of {normative(<branch>), beta, stable}
-#   but doxy_type for master branch will now change to the tag name used 
+#   but doxy_type for master branch will now change to the tag name used
 #   for a master build
 NORMATIVE_DOXY_TYPE=`echo $DOXY_TYPE | tr  "/" "_"`
 if [ "$DOXY_TYPE" == "master" ]; then
@@ -88,7 +88,7 @@ if [ $? != 0 ]; then
     echo -n "Failed: "; usage
     exit $BUILDBOT_FAILURE
 fi
-ssh "$REMOTE_USER@$REMOTE_HOST"  test -e $REMOTE_DIR 
+ssh "$REMOTE_USER@$REMOTE_HOST"  test -e $REMOTE_DIR
 if [ $? != 0 ]; then
     echo "*** Failed: \"ssh $REMOTE_USER@$REMOTE_HOST  test -e $REMOTE_DIR\"\n*** Is directory: \"$REMOTE_DIR\" valid?"
     exit $BUILDBOT_FAILURE
@@ -112,7 +112,7 @@ eups list -s
 # Create doxygen docs for ALL setup packages; following is magic environment var
 export xlinkdoxy=1
 
-scons 
+scons
 if [  $? != 0 ]; then
     echo "*** Failed to build lsstDoxygen package."
     exit $BUILDBOT_FAILURE
@@ -144,9 +144,9 @@ if [ $? != 0 ] ; then
     exit $BUILDBOT_FAILURE
 fi
 
-# rename the html directory 
+# rename the html directory
 echo "Move the documentation into web position"
-DOC_DIR="xlink_${NORMATIVE_DOXY_TYPE}_$DATE" 
+DOC_DIR="xlink_${NORMATIVE_DOXY_TYPE}_$DATE"
 echo "DOC_DIR: $DOC_DIR"
 mv html  $DOC_DIR
 chmod o+rx $DOC_DIR
@@ -180,4 +180,3 @@ if [ $? != 0 ]; then
     exit $BUILDBOT_FAILURE
 fi
 echo "INFO: Updated symlink: \"$SYM_LINK\", to point to new doxygen documentation: $DOC_DIR."
-

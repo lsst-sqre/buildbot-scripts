@@ -2,8 +2,8 @@
 #  Install the DM code stack using the lsstsw package procedure: rebuild
 
 # /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
-#  This script modifies the actual DM stack on the cluster. It therefore 
-#  explicitly checks literal strings to ensure that non-standard buildbot 
+#  This script modifies the actual DM stack on the cluster. It therefore
+#  explicitly checks literal strings to ensure that non-standard buildbot
 #  expectations regarding the 'work' directory location are  equivalent.
 # /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 
@@ -19,7 +19,7 @@ RUN_DEMO="yes"
 PRODUCT=""
 NO_FETCH=0
 
-# Buildbot remotely invokes scripts with a stripped down environment.  
+# Buildbot remotely invokes scripts with a stripped down environment.
 umask 002
 
 print_error() {
@@ -88,9 +88,9 @@ if [ $? -ne 0 ]; then
     exit $BUILDBOT_FAILURE
 fi
 
-# Rebuild the stack if a git pkg changed. 
+# Rebuild the stack if a git pkg changed.
 if [ ! -f ${LSSTSW}/bin/rebuild ]; then
-     print_error "Failed to find 'rebuild'." 
+     print_error "Failed to find 'rebuild'."
      exit $BUILDBOT_FAILURE
 fi
 echo "Rebuild is commencing....stand by; using $REF_LIST"
@@ -137,14 +137,14 @@ else
         fi
     done
     if [ "`ls -A ${LSSTSW_BUILD_DIR}/$FAILED_LOGS/$BUILD_NUMBER`" != "" ]; then
-        print_error "Failed during rebuild of DM stack." 
+        print_error "Failed during rebuild of DM stack."
         echo "The following build artifacts are in directory: ${LSSTSW_BUILD_DIR}/$FAILED_LOGS/$BUILD_NUMBER/"
         ls ${LSSTSW_BUILD_DIR}/$FAILED_LOGS/$BUILD_NUMBER/*
     else
         print_error "Failed during setup prior to stack rebuild."
     fi
-    exit $BUILDBOT_FAILURE 
-fi  
+    exit $BUILDBOT_FAILURE
+fi
 
 
 # Build doxygen documentation
@@ -168,7 +168,7 @@ else
 fi
 
 #=================================================================
-# Then the BB_LastTag file is updated since full processing completed 
+# Then the BB_LastTag file is updated since full processing completed
 # successfully.
 echo -n $TAG >  ${LSSTSW_BUILD_DIR}/BB_Last_Tag
 od -bc ${LSSTSW_BUILD_DIR}/BB_Last_Tag
