@@ -42,7 +42,7 @@ do
     esac
 done
 
-if [ "${BRANCH}" == "None" ]; then
+if [[ "${BRANCH}" == "None" || "${BRANCH}" == "master" ]]; then
     BRANCH="master"
 else
     BRANCH="${BRANCH} master"
