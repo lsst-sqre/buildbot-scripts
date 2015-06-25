@@ -107,9 +107,6 @@ fi
 # Set current build tag (also used as eups tag per installed package).
 eval "$(grep -E '^BUILD=' "$LSSTSW_BUILD_DIR"/manifest.txt | sed -e 's/BUILD/TAG/')"
 
-BUILD_STATUS="success" && (( $RET != 0 )) && BUILD_STATUS="failure"
-echo "$TAG:$BUILD_NUMBER:$BUILD_STATUS:$BRANCH" >> ${LSSTSW_BUILD_DIR}/eupsTag_buildbotNum
-
 if [ $RET -eq 0 ]; then
     print_error "The DM stack has been installed at $LSSTSW with tag: $TAG."
 else
