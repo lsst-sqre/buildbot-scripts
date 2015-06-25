@@ -168,12 +168,6 @@ else
 fi
 
 #=================================================================
-# Then the BB_LastTag file is updated since full processing completed
-# successfully.
-echo -n $TAG >  ${LSSTSW_BUILD_DIR}/BB_Last_Tag
-od -bc ${LSSTSW_BUILD_DIR}/BB_Last_Tag
-
-#=================================================================
 # Finally run a simple test of package integration
 if [ $RUN_DEMO == "yes" ]; then
     echo "Start Demo run at: `date`"
