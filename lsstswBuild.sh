@@ -19,7 +19,7 @@ RUN_DEMO="yes"
 PRODUCT=""
 NO_FETCH=0
 PRINT_FAIL=0
-COLORIZE=1
+COLORIZE=0
 
 # Buildbot remotely invokes scripts with a stripped down environment.
 umask 002
@@ -103,7 +103,7 @@ print_build_failure() {
     done
 }
 
-options=(getopt --long build_number:,branch:,product:,skip_docs,skip_demo,no-fetch,print-fail -- "$@")
+options=(getopt --long build_number:,branch:,product:,skip_docs,skip_demo,no-fetch,print-fail,color -- "$@")
 while true
 do
     case "$1" in
@@ -114,6 +114,7 @@ do
         --skip_demo)    RUN_DEMO="no"     ; shift 1 ;;
         --no-fetch)     NO_FETCH=1        ; shift 1 ;;
         --print-fail)   PRINT_FAIL=1      ; shift 1 ;;
+        --color)        COLORIZE=1        ; shift 1 ;;
         --) shift ; break ;;
         *) [ "$*" != "" ] && print_error "Unknown option: $1" && exit $BUILDBOT_FAILURE
            break;;
