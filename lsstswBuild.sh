@@ -81,16 +81,18 @@ print_build_failure() {
             continue
         fi
 
+        # print the build log if it contains any "error"s
+        if grep -q -i error $build_log; then
+            start_section "$pkg - _build.log"
+            echo -e "$(<$build_log)"
+            end_section # $pkg - _build.log
+        fi
+
         # check to see if package had any failed tests
         shopt -s nullglob
         failed_tests=(${test_dir}/*.failed)
 
         if [ ${#failed_tests[@]} -ne 0 ]; then
-            # only print the build log if there were test failures
-            start_section "$pkg - _build.log"
-            echo -e "$(<$build_log)"
-            end_section # $pkg - _build.log
-
             for test in "${failed_tests[@]}"; do
                 # script basename
                 script=${test##*/}
