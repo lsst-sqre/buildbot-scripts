@@ -196,7 +196,7 @@ if [ $NO_FETCH -eq 1 ]; then
     ${LSSTSW}/bin/rebuild -n $REF_LIST $PRODUCT
     RET=$?
 else
-    ${LSSTSW}/bin/rebuild $REF_LIST $PRODUCT
+    ${LSSTSW}/bin/rebuild -u $REF_LIST $PRODUCT
     RET=$?
 fi
 
