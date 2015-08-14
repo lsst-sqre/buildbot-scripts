@@ -68,11 +68,22 @@ end_section() {
     echo -ne "\n"
 }
 
+print_log_file() {
+    local pkg=$1
+    local log=$2
+    local basename=${log##*/}
+
+    start_section "$pkg - $basename"
+    echo -e "$(<$log)"
+    end_section
+}
+
 print_build_failure() {
     for pkg in "${PACKAGES[@]}"; do
-        build_dir=${LSSTSW_BUILD_DIR}/${pkg}
-        build_log=${build_dir}/_build.log
-        test_dir=${build_dir}/tests/.tests
+        local build_dir=${LSSTSW_BUILD_DIR}/${pkg}
+        local build_log=${build_dir}/_build.log
+        local test_dir=${build_dir}/tests/.tests
+        local config_log=${build_dir}/config.log
 
         # check to see if build log exists
         if [ ! -e $build_log ]; then
@@ -82,24 +93,40 @@ print_build_failure() {
         fi
 
         # print the build log if it contains any "error"s
+        local build_error=false
         if grep -q -i error $build_log; then
-            start_section "$pkg - _build.log"
-            echo -e "$(<$build_log)"
-            end_section # $pkg - _build.log
+            build_error=true
         fi
 
         # check to see if package had any failed tests
+        local test_error=false
         shopt -s nullglob
-        failed_tests=(${test_dir}/*.failed)
-
+        local failed_tests=(${test_dir}/*.failed)
         if [ ${#failed_tests[@]} -ne 0 ]; then
-            for test in "${failed_tests[@]}"; do
-                # script basename
-                script=${test##*/}
+            test_error=true
+        fi
 
-                start_section "$pkg - $script"
-                print_error "$(<$test)"
-                end_section # $pkg - $script
+        local log_files=() # array of logs to print
+
+        # if any errors were detected for this package...
+        if [[ "$build_error" == true || "$test_error" == true ]]; then
+            # print _build.log
+            log_files=("${log_files[@]}" "$build_log")
+
+            # print config.log (if it exists)
+            if [ -e $config_log ]; then
+                log_files=("${log_files[@]}" "$config_log")
+            fi
+        fi
+
+        # and print any failed tests
+        if [[ "$test_error" == true ]]; then
+            log_files=("${log_files[@]}" "${failed_tests[@]}")
+        fi
+
+        if [ ${#log_files[@]} -ne 0 ]; then
+            for log in "${log_files[@]}"; do
+                print_log_file $pkg $log
             done
         fi
     done
