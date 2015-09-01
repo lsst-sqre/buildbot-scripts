@@ -150,12 +150,7 @@ do
     esac
 done
 
-if [[ "${BRANCH}" == "None" || "${BRANCH}" == "master" ]]; then
-    BRANCH="master"
-else
-    BRANCH="${BRANCH} master"
-fi
-
+# mangle whitespace and prepend ` -r ` in front of each ref
 REF_LIST=`echo $BRANCH | sed  -e "s/ \+ / /g" -e "s/^/ /" -e "s/ $//" -e "s/ / -r /g"`
 
 
