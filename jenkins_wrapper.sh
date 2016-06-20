@@ -52,11 +52,17 @@ export LSSTSW=${LSSTSW:-$WORKSPACE/lsstsw}
 (
   cd "$LSSTSW"
 
+  OPTS=()
+
   if [[ $python == "py3" ]]; then
-    ./bin/deploy -3 -b
-  else
-    ./bin/deploy -b
+    OPTS+=('-3')
   fi
+
+  if [[ $deploy == "bleed" ]]; then
+    OPTS+=('-b')
+  fi
+
+  ./bin/deploy "${OPTS[@]}"
 )
 
 "${WORKSPACE}/buildbot-scripts/lsstswBuild.sh" "${ARGS[@]}"
