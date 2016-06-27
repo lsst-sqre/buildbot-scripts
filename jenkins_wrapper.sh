@@ -47,7 +47,7 @@ if grep -q -i "CentOS release 6" /etc/redhat-release; then
 fi
 set +o verbose
 
-export LSSTSW="$WORKSPACE/lsstsw"
+export LSSTSW=${LSSTSW:-$WORKSPACE/lsstsw}
 
 (
   cd "$LSSTSW"
