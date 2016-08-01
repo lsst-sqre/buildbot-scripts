@@ -29,7 +29,10 @@ if [[ ! -z "$PRODUCT" ]]; then
   ARGS+=("$PRODUCT")
 fi
 
-ARGS+=('--skip_docs')
+if [[ $SKIP_DOCS == "true" ]]; then
+  ARGS+=('--skip_docs')
+fi
+
 ARGS+=('--print-fail')
 ARGS+=('--color')
 
