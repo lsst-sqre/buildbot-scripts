@@ -167,9 +167,7 @@ settings=(
     COLORIZE
     DEMO_ROOT
     DEMO_TGZ
-    DOC_PUSH_HOST
     DOC_PUSH_PATH
-    DOC_PUSH_USER
     DOC_REPO_DIR
     DOC_REPO_NAME
     DOC_REPO_URL
@@ -309,7 +307,7 @@ if [ $BUILD_DOCS == "yes" ]; then
     start_section "doc build"
 
     print_info "Start Documentation build at: `date`"
-    ${SCRIPT_DIR}/create_xlinkdocs.sh --type "master" --user $DOC_PUSH_USER --host $DOC_PUSH_HOST --path $DOC_PUSH_PATH
+    ${SCRIPT_DIR}/create_xlinkdocs.sh --type "master" --path $DOC_PUSH_PATH
     RET=$?
 
     if [ $RET -eq 2 ]; then
