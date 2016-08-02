@@ -160,7 +160,7 @@ echo "INFO: Doxygen documentation copied to \"$DOC_INSTALL_DIR\""
 # symlink the default xlinkdoxy name to new directory.
 ln -sf "$DOC_INSTALL_DIR" "$SYM_LINK_PATH"
 if [ $? != 0 ]; then
-    echo "*** Failed to symlink: \"$SYM_LINK_PATH\", to new doxygen documentation: \"$DOC_DIR\""
+    echo "*** Failed to symlink: \"$SYM_LINK_PATH\", to new doxygen documentation: \"$DOC_INSTALL_DIR\""
     exit "$BUILDBOT_FAILURE"
 fi
 echo "INFO: Updated symlink: \"$SYM_LINK_PATH\", to point to new doxygen documentation: $DOC_INSTALL_DIR."
