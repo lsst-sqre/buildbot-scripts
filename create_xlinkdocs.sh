@@ -1,112 +1,102 @@
 #! /bin/bash
-# Build cross linked doxygen documents and load into buildbot public_html website
+
+# Build cross linked doxygen documents and load into directory hierarchy
+# intended to be exposed via a web-server.
 
 SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
-source ${SCRIPT_DIR}/settings.cfg.sh
-source ${LSSTSW}/bin/setup.sh
+source "${SCRIPT_DIR}/settings.cfg.sh"
+source "${LSSTSW}/bin/setup.sh"
 
 usage() {
-    echo "Usage: $0 --type <type> --user <remote user on doxy host> --host <remote doxy host> --path  <remote doxy docs path>"
+    echo "Usage: $0 --type <type> --path <doxy docs path>"
     echo "Build crosslinked doxygen documentation and install on LSST website."
     echo "             type: either <git-branch>,  \"stable\", or \"beta\""
-    echo "             user: remote user account with access to directory containing the DM doxygen documentation"
-    echo "             host: remote system hosting the publicly accessible DM doxygen documentation"
-    echo "             path: actual remote path to the publicly accessible DM doxygen documentation"
-    echo "Example: $0 --type master --user buildbot --host lsst-dev.ncsa.illinois.edu --path /lsst/home/buildbot/public_html/doxygen"
-    echo "Example: $0 --type Winter2012 --user buildbot --host lsst-dev.ncsa.illinois.edu --path /lsst/home/buildbot/public_html/doxygen"
-    echo "Example: $0 --type stable --user buildbot --host lsst-dev.ncsa.illinois.edu --path /lsst/home/buildbot/public_html/doxygen"
-    exit $BUILDBOT_FAILURE
+    echo "             path: actual path to the publicly accessible DM doxygen documentation"
+    echo "Example: $0 --type master --path /home/foo/public_html/doxygen"
+    echo "Example: $0 --type Winter2012 ---path /home/foo/public_html/doxygen"
+    echo "Example: $0 --type stable --path /home/foo/public_html/doxygen"
+    exit "$BUILDBOT_FAILURE"
 }
 
-#-----------------------------------------------------------------------------
-#                         W A R N I N G
-# The following test process will install the documentation of latest master build
-# into ~buildbot/public_html/doxygen .
-#                         W A R N I N G
-#  To manually invoke this buildbot script,  you need to have your ssh public
-#  key installed in ~buildbot/.ssh/authorized_keys  and then do:
-# % <setup eups>
-# % cd <your work dir>
-# % ~buildbot/RHEL6/scripts/create_xlinkdocs.sh --type master --user buildbot --host lsst-dev.ncsa.illinois.edu --path /lsst/home/buildbot/public_html/doxygen
-#-----------------------------------------------------------------------------
-echo "LSSTSW_BUILD_DIR: $LSSTSW_BUILD_DIR"
-
-options=(getopt --long type:,user:,host:,directory: -- "$@")
+# shellcheck disable=SC2034 disable=SC2054
+options=(getopt --long type:,path: -- "$@")
 while true
 do
     case "$1" in
         --type) DOXY_TYPE="$2";   shift 2 ;;
-        --user) REMOTE_USER="$2"; shift 2 ;;
-        --host) REMOTE_HOST="$2"; shift 2 ;;
-        --path) REMOTE_DIR="$2";  shift 2 ;;
+        --path) INSTALL_ROOT="$2"; shift 2 ;;
         --) shift ; break ;;
-        *) [ "$*" != "" ] && echo "Parsed options; arguments left are:$*:"
+        *) [ "$*" != "" ] && echo "Parsed options; arguments left are:$*:" && exit "$BUILDBOT_FAILURE"
             break;;
     esac
 done
 
-
-if [ -z "$DOXY_TYPE"  -o  -z "$REMOTE_USER"   -o   -z "$REMOTE_HOST"  -o  -z "$REMOTE_DIR" ]; then
+if [ -z "$DOXY_TYPE" -o -z "$INSTALL_ROOT" ]; then
     echo "***  Missing a required input parameter."
     usage
-    exit $BUILDBOT_FAILURE
+    exit "$BUILDBOT_FAILURE"
 fi
 
-DATE="`date +%Y`_`date +%m`_`date +%d`_`date +%H.%M.%S`"
-DESTINATION="$REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR"
+DATE="$(date +%Y)_$(date +%m)_$(date +%d)_$(date +%H.%M.%S)"
 
 # Normative doxy_type needs to be one of {normative(<branch>), beta, stable}
 #   but doxy_type for master branch will now change to the tag name used
 #   for a master build
-NORMATIVE_DOXY_TYPE=`echo $DOXY_TYPE | tr  "/" "_"`
+NORMATIVE_DOXY_TYPE=$(echo "$DOXY_TYPE" | tr  "/" "_")
 if [ "$DOXY_TYPE" == "master" ]; then
     eval "$(grep -E '^BUILD=' "$LSSTSW_BUILD_DIR"/manifest.txt)"
     echo "BUILD: $BUILD"
     if [ -z "$BUILD" ]; then
         echo "*** Failed: to determine most recent master build number."
-        exit $BUILDBOT_FAILURE
+        exit "$BUILDBOT_FAILURE"
     else
         DOXY_TYPE=$BUILD
     fi
 fi
-SYM_LINK="x_${NORMATIVE_DOXY_TYPE}DoxyDoc"
 
-echo "whoami: "`whoami`
-echo "DATE: $DATE"
-echo "REMOTE_USER $REMOTE_USER"
-echo "REMOTE_HOST: $REMOTE_HOST"
-echo "REMOTE_DIR: $REMOTE_DIR"
-echo "DESTINATION: $DESTINATION"
-echo "DOXY_TYPE: $DOXY_TYPE"
-echo "NORMATIVE_DOXY_TYPE: $NORMATIVE_DOXY_TYPE"
-echo "DOC_REPO_URL: $DOC_REPO_URL"
-echo "DOC_REPO_DIR: $DOC_REPO_DIR"
+SYM_LINK_NAME="x_${NORMATIVE_DOXY_TYPE}DoxyDoc"
+SYM_LINK_PATH="${INSTALL_ROOT}/${SYM_LINK_NAME}"
+DOC_NAME="xlink_${NORMATIVE_DOXY_TYPE}_$DATE"
+DOC_INSTALL_DIR="${INSTALL_ROOT}/${DOC_NAME}"
 
-ssh "$REMOTE_USER@$REMOTE_HOST" pwd
-if [ $? != 0 ]; then
-    echo "*** $REMOTE_USER@$REMOTE_HOST  is not an accessible URL"
-    echo -n "Failed: "; usage
-    exit $BUILDBOT_FAILURE
-fi
-ssh "$REMOTE_USER@$REMOTE_HOST"  test -e $REMOTE_DIR
-if [ $? != 0 ]; then
-    echo "*** Failed: \"ssh $REMOTE_USER@$REMOTE_HOST  test -e $REMOTE_DIR\"\n*** Is directory: \"$REMOTE_DIR\" valid?"
-    exit $BUILDBOT_FAILURE
-fi
+# print "settings"
+settings=(
+    DATE
+    DOC_INSTALL_DIR
+    DOC_NAME
+    DOC_REPO_DIR
+    DOC_REPO_URL
+    DOXY_TYPE
+    INSTALL_ROOT
+    LSSTSW_BUILD_DIR
+    NORMATIVE_DOXY_TYPE
+    SYM_LINK_NAME
+    SYM_LINK_PATH
+)
 
-# Ensure fresh extraction
-rm -rf $DOC_REPO_DIR
+for i in ${settings[*]}
+do
+    eval echo "${i}: \$$i"
+done
 
-# SCM clone lsstDoxygen ** from master **
-git clone $DOC_REPO_URL $DOC_REPO_DIR
+(
+    set -e
+
+    # Ensure fresh extraction
+    rm -rf "$DOC_REPO_DIR"
+
+    # SCM clone lsstDoxygen ** from master **
+    git clone "$DOC_REPO_URL" "$DOC_REPO_DIR"
+)
 if [ $? != 0 ]; then
     echo "*** Failed to clone '$DOC_REPO_URL'."
-    exit $BUILDBOT_FAILURE
+    exit "$BUILDBOT_FAILURE"
 fi
 
 # setup all packages required by lsstDoxygen's eups
-cd $DOC_REPO_DIR
-setup -t $DOXY_TYPE -r .
+cd "$DOC_REPO_DIR"
+# XXX can not run setup in a subshell for error handling
+setup -t "$DOXY_TYPE" -r .
 eups list -s
 
 # Create doxygen docs for ALL setup packages; following is magic environment var
@@ -115,68 +105,62 @@ export xlinkdoxy=1
 scons
 if [  $? != 0 ]; then
     echo "*** Failed to build lsstDoxygen package."
-    exit $BUILDBOT_FAILURE
+    exit "$BUILDBOT_FAILURE"
 fi
 
 # Now setup for build of Data Release library documentation
-DATAREL_VERSION=`eups list -t $DOXY_TYPE datarel | awk '{print $1}'`
+DATAREL_VERSION=$(eups list -t "$DOXY_TYPE" datarel | awk '{print $1}')
 if [ -z "$DATAREL_VERSION" ]; then
     echo "*** Failed to find datarel \"$DOXY_TYPE\" version."
-    exit $BUILDBOT_FAILURE
+    exit "$BUILDBOT_FAILURE"
 fi
 echo "DATAREL_VERSION: $DATAREL_VERSION"
 
-setup datarel $DATAREL_VERSION
-echo "Packages setup:"
+# XXX can not run setup in a subshell for error handling
+setup datarel "$DATAREL_VERSION"
 eups list -s
-echo ""
 
-
-${DOC_REPO_DIR}/bin/makeDocs --nodot datarel $DATAREL_VERSION > MakeDocs.out
+"${DOC_REPO_DIR}/bin/makeDocs" --nodot datarel "$DATAREL_VERSION" > MakeDocs.out
 if [ $? != 0 ] ; then
     echo "*** Failed to generate complete makeDocs output for \"$DOXY_TYPE\" source."
-    exit $BUILDBOT_FAILURE
+    exit "$BUILDBOT_FAILURE"
 fi
 
 doxygen MakeDocs.out
 if [ $? != 0 ] ; then
     echo "*** Failed to generate doxygen documentation for \"$DOXY_TYPE\" source."
-    exit $BUILDBOT_FAILURE
+    exit "$BUILDBOT_FAILURE"
 fi
 
-# rename the html directory
-echo "Move the documentation into web position"
-DOC_DIR="xlink_${NORMATIVE_DOXY_TYPE}_$DATE"
-echo "DOC_DIR: $DOC_DIR"
-mv html  $DOC_DIR
-chmod o+rx $DOC_DIR
+# install built doxygen
 
-# send doxygen output directory (formerly: html) to LSST doc website
-ssh $REMOTE_USER@$REMOTE_HOST mkdir -p $REMOTE_DIR/$DOC_DIR
-echo "CMD: scp -qr ${DOC_REPO_DIR}/$DOC_DIR  ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
-scp -qr ${DOC_REPO_DIR}/$DOC_DIR  ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}
+(
+    set -e
+
+    mkdir -p "$INSTALL_ROOT"
+    chmod o+rx "$INSTALL_ROOT"
+)
 if [ $? != 0 ]; then
-    echo "*** Failed to copy doxygen documentation: ${DOC_REPO_DIR}/$DOC_DIR to ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
-    exit $BUILDBOT_FAILURE
+    echo "*** Failed to prepare install root: ${INSTALL_ROOT}"
+    exit "$BUILDBOT_FAILURE"
 fi
-echo "INFO: Doxygen documentation from \"$DOC_DIR\" copied to \"$DESTINATION/$DOC_DIR\""
-ssh $REMOTE_USER@$REMOTE_HOST chmod +r $REMOTE_DIR/$DOC_DIR
 
+(
+    set -e
 
-# If old sym link exists, save name of actual directory then remove link
-ssh $REMOTE_USER@$REMOTE_HOST  test -e $REMOTE_DIR/$SYM_LINK
-if [ $? == 0 ]; then
-    echo "INFO: Old sym link exists, remove it and prepare to remove the actual dir."
-    RET_VALUE=`ssh $REMOTE_USER@$REMOTE_HOST ls -l $REMOTE_DIR/$SYM_LINK | sed -e 's/^.*-> //' -e 's/ //g'`
-    OLD_DOXY_DOC_DIR=`basename $RET_VALUE`
-    ssh $REMOTE_USER@$REMOTE_HOST rm -f $REMOTE_DIR/$SYM_LINK
+    cp -ar html "$DOC_INSTALL_DIR"
+    chmod o+rx "$DOC_INSTALL_DIR"
+)
+if [ $? != 0 ]; then
+    echo "*** Failed to copy doxygen documentation to ${DOC_INSTALL_DIR}"
+    exit "$BUILDBOT_FAILURE"
 fi
+echo "INFO: Doxygen documentation copied to \"$DOC_INSTALL_DIR\""
 
 # symlink the default xlinkdoxy name to new directory.
-echo "INFO: ssh $REMOTE_USER@$REMOTE_HOST \"cd $REMOTE_DIR; ln -s  $REMOTE_DIR/$DOC_DIR $SYM_LINK\""
-ssh $REMOTE_USER@$REMOTE_HOST "cd $REMOTE_DIR;ln -s $REMOTE_DIR/$DOC_DIR $SYM_LINK"
+ln -sf "$DOC_INSTALL_DIR" "$SYM_LINK_PATH"
 if [ $? != 0 ]; then
-    echo "*** Failed to symlink: \"$SYM_LINK\", to new doxygen documentation: \"$DOC_DIR\""
-    exit $BUILDBOT_FAILURE
+    echo "*** Failed to symlink: \"$SYM_LINK_PATH\", to new doxygen documentation: \"$DOC_DIR\""
+    exit "$BUILDBOT_FAILURE"
 fi
-echo "INFO: Updated symlink: \"$SYM_LINK\", to point to new doxygen documentation: $DOC_DIR."
+echo "INFO: Updated symlink: \"$SYM_LINK_PATH\", to point to new doxygen documentation: $DOC_INSTALL_DIR."
