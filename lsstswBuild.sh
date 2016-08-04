@@ -8,8 +8,8 @@
 # /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 
 SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
-source ${SCRIPT_DIR}/settings.cfg.sh
-source ${LSSTSW}/bin/setup.sh
+source "${SCRIPT_DIR}/settings.cfg.sh"
+source "${LSSTSW}/bin/setup.sh"
 
 # Reuse an existing lsstsw installation
 BUILD_NUMBER="0"
@@ -34,36 +34,36 @@ set_color() {
 
 no_color() {
     if [ $COLORIZE -eq 1 ]; then
-        echo -ne $NO_COLOR
+        echo -ne "$NO_COLOR"
     fi
 }
 
 print_success() {
-    set_color $LIGHT_GREEN
+    set_color "$LIGHT_GREEN"
     echo -e "$@"
     no_color
 }
 
 print_info() {
-    set_color $YELLOW
+    set_color "$YELLOW"
     echo -e "$@"
     no_color
 }
 
 # XXX this script is very inconsistent about what is sent to stdout vs stderr
 print_error() {
-    set_color $LIGHT_RED
+    set_color "$LIGHT_RED"
     >&2 echo -e "$@"
     no_color
 }
 
 start_section() {
-    print_info "### $@"
-    print_info $tbar
+    print_info "### $*"
+    print_info "$tbar"
 }
 
 end_section() {
-    print_info $sbar
+    print_info "$sbar"
     echo -ne "\n"
 }
 
@@ -73,7 +73,7 @@ print_log_file() {
     local basename=${log##*/}
 
     start_section "$pkg - $basename"
-    echo -e "$(<$log)"
+    echo -e "$(<"$log")"
     end_section
 }
 
@@ -85,7 +85,7 @@ print_build_failure() {
         local config_log=${build_dir}/config.log
 
         # check to see if build log exists
-        if [ ! -e $build_log ]; then
+        if [ ! -e "$build_log" ]; then
             # no log means that package was not [attempted] to be be built
             # on this run
             continue
@@ -93,7 +93,7 @@ print_build_failure() {
 
         # print the build log if it contains any "error"s
         local build_error=false
-        if grep -q -i error $build_log; then
+        if grep -q -i error "$build_log"; then
             build_error=true
         fi
 
@@ -113,7 +113,7 @@ print_build_failure() {
             log_files=("${log_files[@]}" "$build_log")
 
             # print config.log (if it exists)
-            if [ -e $config_log ]; then
+            if [ -e "$config_log" ]; then
                 log_files=("${log_files[@]}" "$config_log")
             fi
         fi
@@ -125,12 +125,13 @@ print_build_failure() {
 
         if [ ${#log_files[@]} -ne 0 ]; then
             for log in "${log_files[@]}"; do
-                print_log_file $pkg $log
+                print_log_file "$pkg" "$log"
             done
         fi
     done
 }
 
+# shellcheck disable=SC2054 disable=SC2034
 options=(getopt --long build_number:,branch:,product:,skip_docs,skip_demo,no-fetch,print-fail,color -- "$@")
 while true
 do
@@ -144,13 +145,13 @@ do
         --print-fail)   PRINT_FAIL=1      ; shift 1 ;;
         --color)        COLORIZE=1        ; shift 1 ;;
         --) shift ; break ;;
-        *) [ "$*" != "" ] && print_error "Unknown option: $1" && exit $BUILDBOT_FAILURE
+        *) [ "$*" != "" ] && print_error "Unknown option: $1" && exit "$BUILDBOT_FAILURE"
            break;;
     esac
 done
 
 # mangle whitespace and prepend ` -r ` in front of each ref
-REF_LIST=`echo $BRANCH | sed  -e "s/ \+ / /g" -e "s/^/ /" -e "s/ $//" -e "s/ / -r /g"`
+REF_LIST=$(echo "$BRANCH" | sed  -e "s/ \+ / /g" -e "s/^/ /" -e "s/ $//" -e "s/ / -r /g")
 
 
 #
@@ -178,10 +179,10 @@ settings=(
     RUN_DEMO
 )
 
-set_color $LIGHT_CYAN
+set_color "$LIGHT_CYAN"
 for i in ${settings[*]}
 do
-    eval echo "${i}: " \$$i
+    eval echo "${i}: \$$i"
 done
 no_color
 
@@ -192,7 +193,7 @@ end_section # configuration
 # display environment variables
 #
 start_section "environment"
-set_color $LIGHT_CYAN
+set_color "$LIGHT_CYAN"
 printenv
 no_color
 end_section # environment
@@ -203,19 +204,20 @@ end_section # environment
 #
 start_section "build"
 
-if [ ! -x ${LSSTSW}/bin/rebuild ]; then
+if [ ! -x "${LSSTSW}/bin/rebuild" ]; then
      print_error "Failed to find 'rebuild'."
-     exit $BUILDBOT_FAILURE
+     exit "$BUILDBOT_FAILURE"
 fi
 
 print_info "Rebuild is commencing....stand by; using $REF_LIST"
 
 RET=0
+# XXX REF_LIST and PRODUCT would be better handled as arrays
 if [ $NO_FETCH -eq 1 ]; then
-    ${LSSTSW}/bin/rebuild -n $REF_LIST $PRODUCT
+    "${LSSTSW}/bin/rebuild" -n "$REF_LIST" "$PRODUCT"
     RET=$?
 else
-    ${LSSTSW}/bin/rebuild -u $REF_LIST $PRODUCT
+    "${LSSTSW}/bin/rebuild" -u "$REF_LIST" "$PRODUCT"
     RET=$?
 fi
 
@@ -224,10 +226,10 @@ MANIFEST=${LSSTSW_BUILD_DIR}/manifest.txt
 
 # array of eups packages extracted from manifest; this excludes any repos that
 # may be checked out but not part of the current build graph
-PACKAGES=($(tail -n+3 $MANIFEST | awk '{ print $1 }'))
+PACKAGES=($(tail -n+3 "$MANIFEST" | awk '{ print $1 }'))
 
 # Set current build tag (also used as eups tag per installed package).
-eval "$(grep -E '^BUILD=' $MANIFEST | sed -e 's/BUILD/TAG/')"
+eval "$(grep -E '^BUILD=' "$MANIFEST" | sed -e 's/BUILD/TAG/')"
 
 BUILD_FAILED=0
 if [ $RET -eq 0 ]; then
@@ -248,7 +250,7 @@ if [ $BUILD_FAILED -ne 0 ]; then
         print_build_failure
     fi
 
-    exit $BUILDBOT_FAILURE
+    exit "$BUILDBOT_FAILURE"
 fi
 
 
@@ -258,18 +260,18 @@ fi
 if [ $BUILD_DOCS == "yes" ]; then
     start_section "doc build"
 
-    print_info "Start Documentation build at: `date`"
-    ${SCRIPT_DIR}/create_xlinkdocs.sh --type "master" --path $DOC_PUSH_PATH
+    print_info "Start Documentation build at: $(date)"
+    "${SCRIPT_DIR}/create_xlinkdocs.sh" --type "master" --path "$DOC_PUSH_PATH"
     RET=$?
 
     if [ $RET -eq 2 ]; then
         print_error "*** Doxygen documentation returned with a warning."
         print_error "*** Review the Buildbot 'stdio' log for build: $BUILD_NUMBER."
-        exit $BUILDBOT_WARNING
+        exit "$BUILDBOT_WARNING"
     elif [ $RET -ne 0 ]; then
         print_error "*** FAILURE: Doxygen document was not installed."
         print_error "*** Review the Buildbot 'stdio' log for build: $BUILD_NUMBER."
-        exit $BUILDBOT_FAILURE
+        exit "$BUILDBOT_FAILURE"
     fi
     print_success "Doxygen Documentation was installed successfully."
 
@@ -285,17 +287,17 @@ fi
 if [ $RUN_DEMO == "yes" ]; then
     start_section "demo"
 
-    print_info "Start Demo run at: `date`"
-    ${SCRIPT_DIR}/runManifestDemo.sh --tag $TAG  --small
+    print_info "Start Demo run at: $(date)"
+    "${SCRIPT_DIR}/runManifestDemo.sh" --tag "$TAG" --small
     RET=$?
 
     if [ $RET -eq 2 ]; then
         print_error "*** The simple integration demo completed with some statistical deviation in the output comparison."
-        exit $BUILDBOT_WARNING
+        exit "$BUILDBOT_WARNING"
     elif [ $RET -ne 0 ]; then
         print_error "*** There was an error running the simple integration demo."
         print_error "*** Review the Buildbot 'stdio' log for build: $BUILD_NUMBER."
-        exit $BUILDBOT_FAILURE
+        exit "$BUILDBOT_FAILURE"
     fi
     print_success "The simple integration demo was successfully run."
 
