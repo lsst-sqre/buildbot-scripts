@@ -13,7 +13,6 @@ source ${LSSTSW}/bin/setup.sh
 
 # Reuse an existing lsstsw installation
 BUILD_NUMBER="0"
-FAILED_LOGS="FailedLogs"
 BUILD_DOCS="yes"
 RUN_DEMO="yes"
 PRODUCT=""
@@ -247,53 +246,6 @@ end_section # build
 if [ $BUILD_FAILED -ne 0 ]; then
     if [ $PRINT_FAIL -eq 1 ]; then
         print_build_failure
-    else
-        # XXX the artifacting logic is over zealous in what it collects.  Per
-        # discussion via hipchat on 2015-06-26 it was decided that it wasn't
-        # worth the effort to debug this functionality.
-        #
-        # JCH's preference would be do make the --print-fail behavior the
-        # default (only) behavior and remove this code rather than fix it.
-        # For the time being, the log collection behavior will be left enabled
-        # under buildbot on lsst-dev so as not to disturb existing users but
-        # --print-fail will be used under jenkins.
-
-        # Archive the failed build artifacts, if any found.
-        LOG_DIR=${LSSTSW_BUILD_DIR}/$FAILED_LOGS/$BUILD_NUMBER
-        mkdir -p $LOG_DIR
-        if [ $? -ne 0 ]; then
-            print_error "Unable to create directory: $LOG_DIR"
-            exit $BUILDBOT_FAILURE
-        fi
-
-        for product in ${LSSTSW_BUILD_DIR}/[[:lower:]]*/ ; do
-            PACKAGE=`echo $product | sed -e "s/^.*\/build\///"  -e "s/\///"`
-            PKG_LOG_DIR=${LOG_DIR}/${PACKAGE}
-            # Are there failed tests?
-            if [ -n "$(ls -A  $product/tests/.tests/*.failed 2> /dev/null)" ]; then
-                mkdir -p  $PKG_LOG_DIR
-                for i in $product/tests/.tests/*.failed; do
-                    cp -p $i  $PKG_LOG_DIR/.
-                done
-                for i in _build.log _build.tags _build.sh; do
-                    cp -p $product/$i $PKG_LOG_DIR/.
-                done
-            # Are there error messages littered in the output?
-            elif [ -e $product/_build.log ] && \
-                [  ! `grep -qs '\*\*\* \|ERROR ' $product/_build.log` ]; then
-                mkdir -p $PKG_LOG_DIR
-                for i in _build.log _build.tags _build.sh; do
-                    cp -p $product/$i $PKG_LOG_DIR/.
-                done
-            fi
-        done
-        if [ "`ls -A ${LOG_DIR}`" != "" ]; then
-            print_error "Failed during rebuild of DM stack."
-            print_error "The following build artifacts are in directory: ${LOG_DIR}/"
-            ls ${LOG_DIR}/*
-        else
-            print_error "Failed during setup prior to stack rebuild."
-        fi
     fi
 
     exit $BUILDBOT_FAILURE
