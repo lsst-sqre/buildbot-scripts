@@ -70,4 +70,4 @@ export LSSTSW=${LSSTSW:-$WORKSPACE/lsstsw}
   ./bin/deploy "${OPTS[@]}"
 )
 
-"${WORKSPACE}/buildbot-scripts/lsstswBuild.sh" "${ARGS[@]}"
+"$(cd "$(dirname "$0")"; pwd)/lsstswBuild.sh" "${ARGS[@]}"
