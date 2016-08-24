@@ -57,10 +57,12 @@ export LSSTSW=${LSSTSW:-$WORKSPACE/lsstsw}
 
   OPTS=()
 
-  if [[ $python == "py3" ]]; then
+  # shellcheck disable=SC2154
+  if [[ "$python" == "py3" ]]; then
     OPTS+=('-3')
   fi
 
+  # shellcheck disable=SC2154
   if [[ $deploy == "bleed" ]]; then
     OPTS+=('-b')
   fi
