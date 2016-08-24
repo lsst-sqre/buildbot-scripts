@@ -45,7 +45,7 @@ if [[ $NO_FETCH == "true" ]]; then
 fi
 
 set -o verbose
-if grep -q -i "CentOS release 6" /etc/redhat-release; then
+if grep -q -i "CentOS release 6" /etc/redhat-release 2>/dev/null; then
   . /opt/rh/devtoolset-3/enable
 fi
 set +o verbose
