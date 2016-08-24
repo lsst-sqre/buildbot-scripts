@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 #  Install the DM code stack using the lsstsw package procedure: rebuild
 
 # /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
@@ -226,12 +226,15 @@ if [[ ! -z "$PRODUCT" ]]; then
     # XXX intentionally not quoted to allow word splitting
     ARGS+=($PRODUCT)
 fi
+set -e
 
 BUILD_PREPARED=false
 BUILD_SUCCESS=false
 
+set +e
 "${LSSTSW}/bin/rebuild" "${ARGS[@]}"
 RET=$?
+set -e
 
 if [ $RET -eq 0 ]; then
     BUILD_PREPARED=true
@@ -282,8 +285,10 @@ if [ $BUILD_DOCS == "yes" ]; then
     start_section "doc build"
 
     print_info "Start Documentation build at: $(date)"
+    set +e
     "${SCRIPT_DIR}/create_xlinkdocs.sh" --type "master" --path "$DOC_PUSH_PATH"
     RET=$?
+    set -e
 
     if [ $RET -eq 2 ]; then
         print_error "*** Doxygen documentation returned with a warning."
@@ -309,8 +314,10 @@ if [ $RUN_DEMO == "yes" ]; then
     start_section "demo"
 
     print_info "Start Demo run at: $(date)"
+    set +e
     "${SCRIPT_DIR}/runManifestDemo.sh" --tag "$TAG" --small
     RET=$?
+    set -e
 
     if [ $RET -eq 2 ]; then
         print_error "*** The simple integration demo completed with some statistical deviation in the output comparison."
