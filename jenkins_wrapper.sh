@@ -5,6 +5,18 @@
 # `lsst-sqre/buildbot-script` repos have already been cloned into the jenkins
 # `$WORKSPACE`.
 
+# The following environment variables are assumed to be declared by the caller:
+#
+# * BRANCH
+# * BUILD_NUMBER
+# * deploy
+# * NO_FETCH
+# * PRODUCT
+# * python
+# * SKIP_DEMO
+# * SKIP_DOCS
+#
+
 ARGS=()
 
 # append lsst_ci to PRODUCT list unless SKIP_DEMO is set
