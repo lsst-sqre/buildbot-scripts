@@ -5,6 +5,18 @@
 # `lsst-sqre/buildbot-script` repos have already been cloned into the jenkins
 # `$WORKSPACE`.
 
+# The following environment variables are assumed to be declared by the caller:
+#
+# * BRANCH
+# * BUILD_NUMBER
+# * deploy
+# * NO_FETCH
+# * PRODUCT
+# * python
+# * SKIP_DEMO
+# * SKIP_DOCS
+#
+
 ARGS=()
 
 # append lsst_ci to PRODUCT list unless SKIP_DEMO is set
@@ -45,7 +57,7 @@ if [[ $NO_FETCH == "true" ]]; then
 fi
 
 set -o verbose
-if grep -q -i "CentOS release 6" /etc/redhat-release; then
+if grep -q -i "CentOS release 6" /etc/redhat-release 2>/dev/null; then
   . /opt/rh/devtoolset-3/enable
 fi
 set +o verbose
@@ -57,10 +69,12 @@ export LSSTSW=${LSSTSW:-$WORKSPACE/lsstsw}
 
   OPTS=()
 
-  if [[ $python == "py3" ]]; then
+  # shellcheck disable=SC2154
+  if [[ "$python" == "py3" ]]; then
     OPTS+=('-3')
   fi
 
+  # shellcheck disable=SC2154
   if [[ $deploy == "bleed" ]]; then
     OPTS+=('-b')
   fi
@@ -68,4 +82,4 @@ export LSSTSW=${LSSTSW:-$WORKSPACE/lsstsw}
   ./bin/deploy "${OPTS[@]}"
 )
 
-"${WORKSPACE}/buildbot-scripts/lsstswBuild.sh" "${ARGS[@]}"
+"$(cd "$(dirname "$0")"; pwd)/lsstswBuild.sh" "${ARGS[@]}"
