@@ -216,7 +216,10 @@ ARGS=()
 if [ $NO_FETCH -eq 1 ]; then
     ARGS+=("-n")
 else
-    ARGS+=("-u")
+    # el6 has bash < 4.2
+    if [[ ! -n "${REPOSFILE+1}" ]]; then
+        ARGS+=("-u")
+    fi
 fi
 if [[ ! -z "$REF_LIST" ]]; then
     # XXX intentionally not quoted to allow word splitting
