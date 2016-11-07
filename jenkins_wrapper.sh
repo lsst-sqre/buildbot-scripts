@@ -56,22 +56,11 @@ if [[ $NO_FETCH == "true" ]]; then
   ARGS+=('--no-fetch')
 fi
 
-# shellcheck disable=SC2154
-case $compiler in
-  devtoolset-3)
-	set -o verbose
-	. /opt/rh/devtoolset-3/enable
-	set +o verbose
-	;;
-  devtoolset-4)
-    set -o verbose
-    . /opt/rh/devtoolset-4/enable
-    set +o verbose
-	;;
-  *)
-    echo "lp is on fire!"
-    ;;
-esac
+set -o verbose
+if grep -q -i "CentOS release 6" /etc/redhat-release 2>/dev/null; then
+  . /opt/rh/devtoolset-3/enable
+fi
+set +o verbose
 
 export LSSTSW=${LSSTSW:-$WORKSPACE/lsstsw}
 
