@@ -4,7 +4,9 @@
 # intended to be exposed via a web-server.
 
 SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
+# shellcheck source=./settings.cfg.sh
 source "${SCRIPT_DIR}/settings.cfg.sh"
+# shellcheck source=../lsstsw/bin/setup.sh
 source "${LSSTSW}/bin/setup.sh"
 
 usage() {
@@ -31,7 +33,7 @@ do
     esac
 done
 
-if [ -z "$DOXY_TYPE" -o -z "$INSTALL_ROOT" ]; then
+if [[ -z "$DOXY_TYPE" || -z "$INSTALL_ROOT" ]]; then
     echo "***  Missing a required input parameter."
     usage
     exit "$BUILDBOT_FAILURE"
@@ -81,16 +83,13 @@ do
     eval echo "${i}: \$$i"
 done
 
-(
-    set -e
-
+if ! ( set -e
     # Ensure fresh extraction
     rm -rf "$DOC_REPO_DIR"
 
     # SCM clone lsstDoxygen ** from master **
     git clone "$DOC_REPO_URL" "$DOC_REPO_DIR"
-)
-if [ $? != 0 ]; then
+); then
     echo "*** Failed to clone '$DOC_REPO_URL'."
     exit "$BUILDBOT_FAILURE"
 fi
@@ -104,8 +103,7 @@ eups list -s
 # Create doxygen docs for ALL setup packages; following is magic environment var
 export xlinkdoxy=1
 
-scons
-if [  $? != 0 ]; then
+if ! scons; then
     echo "*** Failed to build lsstDoxygen package."
     exit "$BUILDBOT_FAILURE"
 fi
@@ -122,46 +120,37 @@ echo "DATAREL_VERSION: $DATAREL_VERSION"
 setup datarel "$DATAREL_VERSION"
 eups list -s
 
-"${DOC_REPO_DIR}/bin/makeDocs" --nodot --htmlDir "$HTML_DIR" datarel "$DATAREL_VERSION" > MakeDocs.out
-if [ $? != 0 ] ; then
+if ! "${DOC_REPO_DIR}/bin/makeDocs" --nodot --htmlDir "$HTML_DIR" datarel "$DATAREL_VERSION" > MakeDocs.out; then
     echo "*** Failed to generate complete makeDocs output for \"$DOXY_TYPE\" source."
     exit "$BUILDBOT_FAILURE"
 fi
 
-doxygen MakeDocs.out
-if [ $? != 0 ] ; then
+if ! doxygen MakeDocs.out; then
     echo "*** Failed to generate doxygen documentation for \"$DOXY_TYPE\" source."
     exit "$BUILDBOT_FAILURE"
 fi
 
 # install built doxygen
 
-(
-    set -e
-
+if ! ( set -e
     mkdir -p "$INSTALL_ROOT"
     chmod o+rx "$INSTALL_ROOT"
-)
-if [ $? != 0 ]; then
+); then
     echo "*** Failed to prepare install root: ${INSTALL_ROOT}"
     exit "$BUILDBOT_FAILURE"
 fi
 
-(
-    set -e
-
+if ! ( set -e
     cp -ar "$HTML_DIR" "$DOC_INSTALL_DIR"
     chmod o+rx "$DOC_INSTALL_DIR"
-)
-if [ $? != 0 ]; then
+); then
     echo "*** Failed to copy doxygen documentation to ${DOC_INSTALL_DIR}"
     exit "$BUILDBOT_FAILURE"
 fi
 echo "INFO: Doxygen documentation copied to \"$DOC_INSTALL_DIR\""
 
 # symlink the default xlinkdoxy name to new directory.
-ln -snf "$DOC_INSTALL_DIR" "$SYM_LINK_PATH"
-if [ $? != 0 ]; then
+if ! ln -snf "$DOC_INSTALL_DIR" "$SYM_LINK_PATH"; then
     echo "*** Failed to symlink: \"$SYM_LINK_PATH\", to new doxygen documentation: \"$DOC_INSTALL_DIR\""
     exit "$BUILDBOT_FAILURE"
 fi
