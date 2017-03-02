@@ -58,6 +58,7 @@ SYM_LINK_NAME="x_${NORMATIVE_DOXY_TYPE}DoxyDoc"
 SYM_LINK_PATH="${INSTALL_ROOT}/${SYM_LINK_NAME}"
 DOC_NAME="xlink_${NORMATIVE_DOXY_TYPE}_$DATE"
 DOC_INSTALL_DIR="${INSTALL_ROOT}/${DOC_NAME}"
+HTML_DIR="${DOC_REPO_DIR}/doc/html"
 
 # print "settings"
 settings=(
@@ -67,6 +68,7 @@ settings=(
     DOC_REPO_DIR
     DOC_REPO_URL
     DOXY_TYPE
+    HTML_DIR
     INSTALL_ROOT
     LSSTSW_BUILD_DIR
     NORMATIVE_DOXY_TYPE
@@ -120,7 +122,7 @@ echo "DATAREL_VERSION: $DATAREL_VERSION"
 setup datarel "$DATAREL_VERSION"
 eups list -s
 
-"${DOC_REPO_DIR}/bin/makeDocs" --nodot datarel "$DATAREL_VERSION" > MakeDocs.out
+"${DOC_REPO_DIR}/bin/makeDocs" --nodot --htmlDir "$HTML_DIR" datarel "$DATAREL_VERSION" > MakeDocs.out
 if [ $? != 0 ] ; then
     echo "*** Failed to generate complete makeDocs output for \"$DOXY_TYPE\" source."
     exit "$BUILDBOT_FAILURE"
@@ -148,7 +150,7 @@ fi
 (
     set -e
 
-    cp -ar html "$DOC_INSTALL_DIR"
+    cp -ar "$HTML_DIR" "$DOC_INSTALL_DIR"
     chmod o+rx "$DOC_INSTALL_DIR"
 )
 if [ $? != 0 ]; then
