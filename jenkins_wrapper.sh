@@ -23,7 +23,7 @@ ARGS=()
 if [[ $SKIP_DEMO != "true" ]]; then
   if [[ -z "$PRODUCT" ]]; then
     # lsstsw default targets
-    PRODUCT="lsst_sims lsst_distrib qserv_distrib dax_webserv"
+    PRODUCT="lsst_distrib qserv_distrib dax_webserv"
   fi
   PRODUCT="$PRODUCT lsst_ci"
 fi
