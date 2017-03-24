@@ -58,6 +58,7 @@ fi
 
 set -o verbose
 if grep -q -i "CentOS release 6" /etc/redhat-release 2>/dev/null; then
+    # shellcheck disable=SC1091
   . /opt/rh/devtoolset-3/enable
 fi
 set +o verbose
@@ -74,6 +75,16 @@ case $(uname -s) in
     fi
     ;;
 esac
+
+# configure [mini]conda installer/package mirrors *before* deploy is run
+#
+# XXX this is a temporary kludge to work around freestyle/matrix jobs being
+# unable to access injected credentials env vars from inside an
+# environmentVariables block.
+if [[ -n $CMIRROR_S3_BUCKET ]]; then
+    export CONDA_CHANNELS="http://${CMIRROR_S3_BUCKET}/pkgs/free"
+    export MINICONDA_BASE_URL="http://${CMIRROR_S3_BUCKET}/miniconda"
+fi
 
 (
   cd "$LSSTSW"
