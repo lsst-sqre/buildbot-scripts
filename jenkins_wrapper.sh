@@ -58,6 +58,7 @@ fi
 
 set -o verbose
 if grep -q -i "CentOS release 6" /etc/redhat-release 2>/dev/null; then
+    # shellcheck disable=SC1091
   . /opt/rh/devtoolset-3/enable
 fi
 set +o verbose
