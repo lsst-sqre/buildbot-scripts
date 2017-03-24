@@ -76,6 +76,16 @@ case $(uname -s) in
     ;;
 esac
 
+# configure [mini]conda installer/package mirrors *before* deploy is run
+#
+# XXX this is a temporary kludge to work around freestyle/matrix jobs being
+# unable to access injected credentials env vars from inside an
+# environmentVariables block.
+if [[ -n $CMIRROR_S3_BUCKET ]]; then
+    export CONDA_CHANNELS="http://${CMIRROR_S3_BUCKET}/pkgs/free"
+    export MINICONDA_BASE_URL="http://${CMIRROR_S3_BUCKET}/miniconda"
+fi
+
 (
   cd "$LSSTSW"
 
