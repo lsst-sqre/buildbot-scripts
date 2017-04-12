@@ -108,7 +108,7 @@ if ! tar xzf "$DEMO_TGZ"; then
     fail "*** Failed to unpack: ${DEMO_TGZ}"
 fi
 
-DEMO_BASENAME=$(basename "$DEMO_TGZ" | sed -e "s/\..*//")
+DEMO_BASENAME=$(basename "$DEMO_TGZ" | sed -e "s/\.tar\.gz$//")
 echo "DEMO_BASENAME: $DEMO_BASENAME"
 if [[ ! -d $DEMO_BASENAME ]]; then
     fail "*** Failed to find unpacked directory: ${DEMO_BASENAME}"
