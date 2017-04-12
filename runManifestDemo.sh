@@ -6,8 +6,6 @@ set -e
 SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 # shellcheck source=./settings.cfg.sh
 source "${SCRIPT_DIR}/settings.cfg.sh"
-# shellcheck source=../lsstsw/bin/setup.sh
-source "${LSSTSW}/bin/setup.sh"
 
 print_error() {
     >&2 echo -e "$@"
@@ -18,6 +16,10 @@ fail() {
     [[ -n $1 ]] && print_error "$1"
     # shellcheck disable=SC2086
     exit $code
+}
+
+setup() {
+    eval "$(eups_setup DYLD_LIBRARY_PATH="${DYLD_LIBRARY_PATH}" "$@")"
 }
 
 #--------------------------------------------------------------------------
@@ -71,8 +73,6 @@ for i; do
     esac
 done
 
-
-cd "$LSSTSW_BUILD_DIR"
 
 # Setup either requested tag or last successfully built lsst_apps
 if [[ -n $TAG ]]; then
