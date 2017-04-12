@@ -9,6 +9,16 @@ source "${SCRIPT_DIR}/settings.cfg.sh"
 # shellcheck source=../lsstsw/bin/setup.sh
 source "${LSSTSW}/bin/setup.sh"
 
+print_error() {
+    >&2 echo -e "$@"
+}
+
+fail() {
+    code=${2:1}
+    [[ -n $1 ]] && print_error "$1"
+    # shellcheck disable=SC2086
+    exit $code
+}
 
 #--------------------------------------------------------------------------
 # Standalone invocation for gcc master stack:
@@ -21,18 +31,15 @@ source "${LSSTSW}/bin/setup.sh"
 
 #--------------------------------------------------------------------------
 usage() {
-    echo "Usage: $0 [options]"
-    echo "Initiate demonstration run."
-    echo
-    echo "Options:"
-    echo "              --tag <id> : eups-tag for eups-setup or defaults to latest master build."
-    echo "                 --small : to use small dataset; otherwise a mini-production size will be used."
-    exit $BUILDBOT_FAILURE
+    print_error "Usage: $0 [options]"
+    print_error "Initiate demonstration run."
+    print_error
+    print_error "Options:"
+    print_error "              --tag <id> : eups-tag for eups-setup or defaults to latest master build."
+    print_error "                 --small : to use small dataset; otherwise a mini-production size will be used."
+    fail
 }
 
-print_error() {
-    >&2 echo -e "$@"
-}
 
 TAG=""
 SIZE=""
@@ -77,36 +84,31 @@ eups list  -s
 echo "-----------------------------------------------------------------"
 
 if [[ -z $PIPE_TASKS_DIR || -z $OBS_SDSS_DIR ]]; then
-      print_error "*** Failed to setup either PIPE_TASKS or OBS_SDSS; both of  which are required by ${DEMO_BASENAME}"
-      exit $BUILDBOT_FAILURE
+    fail "*** Failed to setup either PIPE_TASKS or OBS_SDSS; both of  which are required by ${DEMO_BASENAME}"
 fi
 
 # Acquire and Load the demo package in buildbot work directory
 echo "curl -kLo ${DEMO_TGZ} ${DEMO_ROOT}"
 curl -kLo "$DEMO_TGZ" "$DEMO_ROOT"
 if [[ ! -f $DEMO_TGZ ]]; then
-    print_error "*** Failed to acquire demo from: ${DEMO_ROOT}."
-    exit $BUILDBOT_FAILURE
+    fail "*** Failed to acquire demo from: ${DEMO_ROOT}."
 fi
 
 echo "tar xzf $DEMO_TGZ"
 if ! tar xzf "$DEMO_TGZ"; then
-    print_error "*** Failed to unpack: ${DEMO_TGZ}"
-    exit $BUILDBOT_FAILURE
+    fail "*** Failed to unpack: ${DEMO_TGZ}"
 fi
 
 DEMO_BASENAME=$(basename "$DEMO_TGZ" | sed -e "s/\..*//")
 echo "DEMO_BASENAME: $DEMO_BASENAME"
 if [[ ! -d $DEMO_BASENAME ]]; then
-    print_error "*** Failed to find unpacked directory: ${DEMO_BASENAME}"
-    exit $BUILDBOT_FAILURE
+    fail "*** Failed to find unpacked directory: ${DEMO_BASENAME}"
 fi
 
 cd "$DEMO_BASENAME"
 
 if ! ./bin/demo.sh --$SIZE; then
-    print_error "*** Failed during execution of $DEMO_BASENAME"
-    exit $BUILDBOT_FAILURE
+    fail "*** Failed during execution of ${DEMO_BASENAME}"
 fi
 
 # Add column position to each label for ease of reading the output comparison
@@ -117,6 +119,5 @@ echo "Columns in benchmark datafile:"
 echo "$NEWCOLUMNS"
 echo "./bin/compare detected-sources${SIZE_EXT}.txt"
 if ! ./bin/compare detected-sources${SIZE_EXT}.txt; then
-    print_error "*** Warning: output results not within error tolerance for: $DEMO_BASENAME"
-    exit $BUILDBOT_WARNING
+    fail "*** Warning: output results not within error tolerance for: ${DEMO_BASENAME}"
 fi

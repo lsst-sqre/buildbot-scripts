@@ -63,6 +63,13 @@ print_error() {
     no_color
 }
 
+fail() {
+    code=${2:1}
+    [[ -n $1 ]] && print_error "$1"
+    # shellcheck disable=SC2086
+    exit $code
+}
+
 start_section() {
     print_info "### $*"
     print_info "$tbar"
@@ -152,7 +159,7 @@ do
         --print-fail)   PRINT_FAIL=1      ; shift 1 ;;
         --color)        COLORIZE=1        ; shift 1 ;;
         --) shift ; break ;;
-        *) [ "$*" != "" ] && print_error "Unknown option: $1" && exit "$BUILDBOT_FAILURE"
+        *) [ "$*" != "" ] && fail "Unknown option: $1"
            break;;
     esac
 done
@@ -212,8 +219,7 @@ end_section # environment
 start_section "build"
 
 if [ ! -x "${LSSTSW}/bin/rebuild" ]; then
-     print_error "Failed to find 'rebuild'."
-     exit "$BUILDBOT_FAILURE"
+     fail "Failed to find 'rebuild'."
 fi
 
 print_info "Rebuild is commencing....stand by; using $REF_LIST"
@@ -283,7 +289,7 @@ if [[ $BUILD_SUCCESS == false ]]; then
         print_build_failure
     fi
 
-    exit "$BUILDBOT_FAILURE"
+    fail
 fi
 
 
@@ -299,14 +305,10 @@ if [ $BUILD_DOCS == "yes" ]; then
     RET=$?
     set -e
 
-    if [ $RET -eq 2 ]; then
-        print_error "*** Doxygen documentation returned with a warning."
-        print_error "*** Review the Buildbot 'stdio' log for build: $BUILD_NUMBER."
-        exit "$BUILDBOT_WARNING"
-    elif [ $RET -ne 0 ]; then
+    if [ $RET -ne 0 ]; then
         print_error "*** FAILURE: Doxygen document was not installed."
         print_error "*** Review the Buildbot 'stdio' log for build: $BUILD_NUMBER."
-        exit "$BUILDBOT_FAILURE"
+        fail
     fi
     print_success "Doxygen Documentation was installed successfully."
 
@@ -323,18 +325,10 @@ if [ $RUN_DEMO == "yes" ]; then
     start_section "demo"
 
     print_info "Start Demo run at: $(date)"
-    set +e
-    "${SCRIPT_DIR}/runManifestDemo.sh" --tag "$TAG" --small
-    RET=$?
-    set -e
-
-    if [ $RET -eq 2 ]; then
-        print_error "*** The simple integration demo completed with some statistical deviation in the output comparison."
-        exit "$BUILDBOT_WARNING"
-    elif [ $RET -ne 0 ]; then
-        print_error "*** There was an error running the simple integration demo."
-        print_error "*** Review the Buildbot 'stdio' log for build: $BUILD_NUMBER."
-        exit "$BUILDBOT_FAILURE"
+    if ! "${SCRIPT_DIR}/runManifestDemo.sh" --tag "$TAG" --small; then
+        error "*** There was an error running the simple integration demo."
+        error "*** Review the Buildbot 'stdio' log for build: $BUILD_NUMBER."
+        fail
     fi
     print_success "The simple integration demo was successfully run."
 
