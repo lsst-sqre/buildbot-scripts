@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 #  Install the DM code stack using the lsstsw package procedure: rebuild
 
 # /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
@@ -7,8 +7,12 @@
 #  expectations regarding the 'work' directory location are  equivalent.
 # /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 
+set -e
+
 SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
+# shellcheck source=./settings.cfg.sh
 source "${SCRIPT_DIR}/settings.cfg.sh"
+# shellcheck source=../lsstsw/bin/setup.sh
 source "${LSSTSW}/bin/setup.sh"
 
 # Reuse an existing lsstsw installation
@@ -23,7 +27,9 @@ COLORIZE=0
 # Buildbot remotely invokes scripts with a stripped down environment.
 umask 002
 
+# shellcheck disable=SC2183
 sbar=$(printf %78s |tr " " "-")
+# shellcheck disable=SC2183
 tbar=$(printf %78s |tr " " "~")
 
 set_color() {

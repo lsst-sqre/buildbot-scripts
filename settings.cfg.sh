@@ -1,4 +1,5 @@
-#! /bin/bash
+#!/bin/bash
+# shellcheck disable=SC2034
 
 # general
 LSSTSW=${LSSTSW:-$HOME/lsstsw}

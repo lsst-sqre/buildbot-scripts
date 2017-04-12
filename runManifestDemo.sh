@@ -1,9 +1,14 @@
 #! /bin/bash
 # Run the demo code to test DM algorithms
 
+set -e
+
 SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
-source ${SCRIPT_DIR}/settings.cfg.sh
-source ${LSSTSW}/bin/setup.sh
+# shellcheck source=./settings.cfg.sh
+source "${SCRIPT_DIR}/settings.cfg.sh"
+# shellcheck source=../lsstsw/bin/setup.sh
+source "${LSSTSW}/bin/setup.sh"
+
 
 #--------------------------------------------------------------------------
 # Standalone invocation for gcc master stack:
@@ -26,13 +31,14 @@ usage() {
 }
 
 print_error() {
-    >&2 echo $@
+    >&2 echo -e "$@"
 }
 
 TAG=""
 SIZE=""
 SIZE_EXT=""
 
+# shellcheck disable=SC2034
 options=$(getopt -l help,small,tag: -- "$@")
 
 while true
@@ -50,70 +56,67 @@ do
 done
 
 
-cd $LSSTSW_BUILD_DIR
+cd "$LSSTSW_BUILD_DIR"
 
 # Setup either requested tag or last successfully built lsst_apps
-if [ -n "$TAG" ]; then
-    setup -t $TAG lsst_apps
+if [[ -n $TAG ]]; then
+    setup -t "$TAG" lsst_apps
 else
     setup -j lsst_apps
-    cd $LSST_APPS_DIR/../
-    VERSION=`ls | sort -r -n -t+ +1 -2 | head -1`
-    setup lsst_apps $VERSION
+    cd "${LSST_APPS_DIR}/../"
+    VERSION=$(find . | sort -r -n -t+ +1 -2 | head -1)
+    setup lsst_apps "$VERSION"
 fi
 #*************************************************************************
 echo "----------------------------------------------------------------"
-echo "EUPS-tag: $TAG     Version: $VERSION"
-echo "Dataset size: $SIZE"
-echo "Current `umask -p`"
+echo "EUPS-tag: ${TAG}     Version: ${VERSION}"
+echo "Dataset size: ${SIZE}"
+echo "Current $(umask -p)"
 echo "Setup lsst_apps"
 eups list  -s
 echo "-----------------------------------------------------------------"
 
-if [ -z  "$PIPE_TASKS_DIR" -o -z "$OBS_SDSS_DIR" ]; then
-      print_error "*** Failed to setup either PIPE_TASKS or OBS_SDSS; both of  which are required by $DEMO_BASENAME"
+if [[ -z $PIPE_TASKS_DIR || -z $OBS_SDSS_DIR ]]; then
+      print_error "*** Failed to setup either PIPE_TASKS or OBS_SDSS; both of  which are required by ${DEMO_BASENAME}"
       exit $BUILDBOT_FAILURE
 fi
 
 # Acquire and Load the demo package in buildbot work directory
-echo "curl -kLo $DEMO_TGZ $DEMO_ROOT"
-curl -kLo $DEMO_TGZ $DEMO_ROOT
-if [ ! -f $DEMO_TGZ ]; then
-    print_error "*** Failed to acquire demo from: $DEMO_ROOT."
+echo "curl -kLo ${DEMO_TGZ} ${DEMO_ROOT}"
+curl -kLo "$DEMO_TGZ" "$DEMO_ROOT"
+if [[ ! -f $DEMO_TGZ ]]; then
+    print_error "*** Failed to acquire demo from: ${DEMO_ROOT}."
     exit $BUILDBOT_FAILURE
 fi
 
 echo "tar xzf $DEMO_TGZ"
-tar xzf $DEMO_TGZ
-if [ $? != 0 ]; then
-    print_error "*** Failed to unpack: $DEMO_TGZ"
+if ! tar xzf "$DEMO_TGZ"; then
+    print_error "*** Failed to unpack: ${DEMO_TGZ}"
     exit $BUILDBOT_FAILURE
 fi
 
-DEMO_BASENAME=`basename $DEMO_TGZ | sed -e "s/\..*//"`
+DEMO_BASENAME=$(basename "$DEMO_TGZ" | sed -e "s/\..*//")
 echo "DEMO_BASENAME: $DEMO_BASENAME"
-cd $DEMO_BASENAME
-if [ $? != 0 ]; then
-    print_error "*** Failed to find unpacked directory: $DEMO_BASENAME"
+if [[ ! -d $DEMO_BASENAME ]]; then
+    print_error "*** Failed to find unpacked directory: ${DEMO_BASENAME}"
     exit $BUILDBOT_FAILURE
 fi
 
-./bin/demo.sh --$SIZE
-if [ $? != 0 ]; then
-    print_error "*** Failed during execution of  $DEMO_BASENAME"
+cd "$DEMO_BASENAME"
+
+if ! ./bin/demo.sh --$SIZE; then
+    print_error "*** Failed during execution of $DEMO_BASENAME"
     exit $BUILDBOT_FAILURE
 fi
 
 # Add column position to each label for ease of reading the output comparison
-COLUMNS=`head -1 detected-sources$SIZE_EXT.txt| sed -e "s/^#//" `
+COLUMNS=$(head -1 detected-sources$SIZE_EXT.txt| sed -e "s/^#//")
 j=1
-NEWCOLUMNS=`for i in $COLUMNS; do echo -n "$j:$i "; j=$((j+1)); done`
+NEWCOLUMNS=$(for i in $COLUMNS; do echo -n "$j:$i "; j=$((j+1)); done)
 echo "Columns in benchmark datafile:"
-echo $NEWCOLUMNS
+echo "$NEWCOLUMNS"
 echo "./bin/compare detected-sources${SIZE_EXT}.txt"
-./bin/compare detected-sources${SIZE_EXT}.txt
-if  [ $? != 0 ]; then
+if ! ./bin/compare detected-sources${SIZE_EXT}.txt; then
     print_error "*** Warning: output results not within error tolerance for: $DEMO_BASENAME"
     exit $BUILDBOT_WARNING
-exit  $BUILDBOT_SUCCESS
 fi
