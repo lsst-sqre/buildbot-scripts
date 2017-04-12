@@ -48,17 +48,26 @@ SIZE_EXT=""
 # shellcheck disable=SC2034
 options=$(getopt -l help,small,tag: -- "$@")
 
-while true
-do
-    case $1 in
-        --help)         usage;;
-        --small)        SIZE="small";
-                        SIZE_EXT="_small";
-                        shift 1;;
-        --tag)          TAG=$2; shift 2;;
-        --)             break ;;
-        *)              [ "$*" != "" ] && usage;
-                        break;;
+for i; do
+    case $i in
+        --help)
+            usage
+            ;;
+        --small)
+            SIZE="small";
+            SIZE_EXT="_small";
+            shift 1
+            ;;
+        --tag)
+            TAG=$2;
+            shift 2
+            ;;
+        --)
+            break
+            ;;
+        *)
+            [ "$*" != "" ] && usage
+            ;;
     esac
 done
 
