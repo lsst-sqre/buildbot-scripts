@@ -14,10 +14,6 @@ DOC_REPO_URL=${DOC_REPO_URL:-"https://github.com/lsst/lsstDoxygen.git"}
 DOC_REPO_NAME=${DOC_REPO_NAME:-"lsstDoxygen"}
 DOC_REPO_DIR=${DOC_REPO_DIR:-"${LSSTSW_BUILD_DIR}/${DOC_REPO_NAME}"}
 
-# runManifestDemo.sh
-DEMO_ROOT=${DEMO_ROOT:-"https://github.com/lsst/lsst_dm_stack_demo/archive/master.tar.gz"}
-DEMO_TGZ=${DEMO_TGZ:-"lsst_dm_stack_demo-master.tar.gz"}
-
 # ansi color codes
 BLACK='\033[0;30m'
 DARK_GRAY='\033[1;30m'
