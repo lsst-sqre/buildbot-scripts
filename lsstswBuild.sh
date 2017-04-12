@@ -16,7 +16,6 @@ source "${SCRIPT_DIR}/settings.cfg.sh"
 source "${LSSTSW}/bin/setup.sh"
 
 # Reuse an existing lsstsw installation
-BUILD_NUMBER="0"
 BUILD_DOCS="yes"
 RUN_DEMO="yes"
 PRODUCT=""
@@ -146,11 +145,10 @@ print_build_failure() {
 
 # XXX REF_LIST and PRODUCT would be better handled as arrays
 # shellcheck disable=SC2054 disable=SC2034
-options=(getopt --long build_number:,branch:,product:,skip_docs,skip_demo,no-fetch,print-fail,color -- "$@")
+options=(getopt --long branch:,product:,skip_docs,skip_demo,no-fetch,print-fail,color -- "$@")
 while true
 do
     case "$1" in
-        --build_number) BUILD_NUMBER="$2" ; shift 2 ;;
         --branch)       BRANCH=$2         ; shift 2 ;;
         --product)      PRODUCT=$2        ; shift 2 ;;
         --skip_docs)    BUILD_DOCS="no"   ; shift 1 ;;
@@ -177,7 +175,6 @@ start_section "configuration"
 settings=(
     BRANCH
     BUILD_DOCS
-    BUILD_NUMBER
     COLORIZE
     DEMO_ROOT
     DEMO_TGZ
@@ -307,7 +304,6 @@ if [ $BUILD_DOCS == "yes" ]; then
 
     if [ $RET -ne 0 ]; then
         print_error "*** FAILURE: Doxygen document was not installed."
-        print_error "*** Review the Buildbot 'stdio' log for build: $BUILD_NUMBER."
         fail
     fi
     print_success "Doxygen Documentation was installed successfully."
@@ -327,7 +323,6 @@ if [ $RUN_DEMO == "yes" ]; then
     print_info "Start Demo run at: $(date)"
     if ! "${SCRIPT_DIR}/runManifestDemo.sh" --tag "$TAG" --small; then
         error "*** There was an error running the simple integration demo."
-        error "*** Review the Buildbot 'stdio' log for build: $BUILD_NUMBER."
         fail
     fi
     print_success "The simple integration demo was successfully run."
