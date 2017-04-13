@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 #  Install the DM code stack using the lsstsw package procedure: rebuild
 
 # /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
@@ -7,12 +7,15 @@
 #  expectations regarding the 'work' directory location are  equivalent.
 # /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 
+set -e
+
 SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
+# shellcheck source=./settings.cfg.sh
 source "${SCRIPT_DIR}/settings.cfg.sh"
+# shellcheck source=../lsstsw/bin/setup.sh
 source "${LSSTSW}/bin/setup.sh"
 
 # Reuse an existing lsstsw installation
-BUILD_NUMBER="0"
 BUILD_DOCS="yes"
 RUN_DEMO="yes"
 PRODUCT=""
@@ -23,7 +26,9 @@ COLORIZE=0
 # Buildbot remotely invokes scripts with a stripped down environment.
 umask 002
 
+# shellcheck disable=SC2183
 sbar=$(printf %78s |tr " " "-")
+# shellcheck disable=SC2183
 tbar=$(printf %78s |tr " " "~")
 
 set_color() {
@@ -55,6 +60,13 @@ print_error() {
     set_color "$LIGHT_RED"
     >&2 echo -e "$@"
     no_color
+}
+
+fail() {
+    code=${2:1}
+    [[ -n $1 ]] && print_error "$1"
+    # shellcheck disable=SC2086
+    exit $code
 }
 
 start_section() {
@@ -133,11 +145,10 @@ print_build_failure() {
 
 # XXX REF_LIST and PRODUCT would be better handled as arrays
 # shellcheck disable=SC2054 disable=SC2034
-options=(getopt --long build_number:,branch:,product:,skip_docs,skip_demo,no-fetch,print-fail,color -- "$@")
+options=(getopt --long branch:,product:,skip_docs,skip_demo,no-fetch,print-fail,color -- "$@")
 while true
 do
     case "$1" in
-        --build_number) BUILD_NUMBER="$2" ; shift 2 ;;
         --branch)       BRANCH=$2         ; shift 2 ;;
         --product)      PRODUCT=$2        ; shift 2 ;;
         --skip_docs)    BUILD_DOCS="no"   ; shift 1 ;;
@@ -146,7 +157,7 @@ do
         --print-fail)   PRINT_FAIL=1      ; shift 1 ;;
         --color)        COLORIZE=1        ; shift 1 ;;
         --) shift ; break ;;
-        *) [ "$*" != "" ] && print_error "Unknown option: $1" && exit "$BUILDBOT_FAILURE"
+        *) [ "$*" != "" ] && fail "Unknown option: $1"
            break;;
     esac
 done
@@ -164,7 +175,6 @@ start_section "configuration"
 settings=(
     BRANCH
     BUILD_DOCS
-    BUILD_NUMBER
     COLORIZE
     DEMO_ROOT
     DEMO_TGZ
@@ -206,8 +216,7 @@ end_section # environment
 start_section "build"
 
 if [ ! -x "${LSSTSW}/bin/rebuild" ]; then
-     print_error "Failed to find 'rebuild'."
-     exit "$BUILDBOT_FAILURE"
+     fail "Failed to find 'rebuild'."
 fi
 
 print_info "Rebuild is commencing....stand by; using $REF_LIST"
@@ -277,7 +286,7 @@ if [[ $BUILD_SUCCESS == false ]]; then
         print_build_failure
     fi
 
-    exit "$BUILDBOT_FAILURE"
+    fail
 fi
 
 
@@ -293,14 +302,9 @@ if [ $BUILD_DOCS == "yes" ]; then
     RET=$?
     set -e
 
-    if [ $RET -eq 2 ]; then
-        print_error "*** Doxygen documentation returned with a warning."
-        print_error "*** Review the Buildbot 'stdio' log for build: $BUILD_NUMBER."
-        exit "$BUILDBOT_WARNING"
-    elif [ $RET -ne 0 ]; then
+    if [ $RET -ne 0 ]; then
         print_error "*** FAILURE: Doxygen document was not installed."
-        print_error "*** Review the Buildbot 'stdio' log for build: $BUILD_NUMBER."
-        exit "$BUILDBOT_FAILURE"
+        fail
     fi
     print_success "Doxygen Documentation was installed successfully."
 
@@ -317,18 +321,9 @@ if [ $RUN_DEMO == "yes" ]; then
     start_section "demo"
 
     print_info "Start Demo run at: $(date)"
-    set +e
-    "${SCRIPT_DIR}/runManifestDemo.sh" --tag "$TAG" --small
-    RET=$?
-    set -e
-
-    if [ $RET -eq 2 ]; then
-        print_error "*** The simple integration demo completed with some statistical deviation in the output comparison."
-        exit "$BUILDBOT_WARNING"
-    elif [ $RET -ne 0 ]; then
-        print_error "*** There was an error running the simple integration demo."
-        print_error "*** Review the Buildbot 'stdio' log for build: $BUILD_NUMBER."
-        exit "$BUILDBOT_FAILURE"
+    if ! "${SCRIPT_DIR}/runManifestDemo.sh" --tag "$TAG" --small; then
+        error "*** There was an error running the simple integration demo."
+        fail
     fi
     print_success "The simple integration demo was successfully run."
 

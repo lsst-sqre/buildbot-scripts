@@ -9,15 +9,26 @@ source "${SCRIPT_DIR}/settings.cfg.sh"
 # shellcheck source=../lsstsw/bin/setup.sh
 source "${LSSTSW}/bin/setup.sh"
 
+print_error() {
+    >&2 echo -e "$@"
+}
+
+fail() {
+    code=${2:1}
+    [[ -n $1 ]] && print_error "$1"
+    # shellcheck disable=SC2086
+    exit $code
+}
+
 usage() {
-    echo "Usage: $0 --type <type> --path <doxy docs path>"
-    echo "Build crosslinked doxygen documentation and install on LSST website."
-    echo "             type: either <git-branch>,  \"stable\", or \"beta\""
-    echo "             path: actual path to the publicly accessible DM doxygen documentation"
-    echo "Example: $0 --type master --path /home/foo/public_html/doxygen"
-    echo "Example: $0 --type Winter2012 ---path /home/foo/public_html/doxygen"
-    echo "Example: $0 --type stable --path /home/foo/public_html/doxygen"
-    exit "$BUILDBOT_FAILURE"
+    print_error "Usage: $0 --type <type> --path <doxy docs path>"
+    print_error "Build crosslinked doxygen documentation and install on LSST website."
+    print_error "             type: either <git-branch>,  \"stable\", or \"beta\""
+    print_error "             path: actual path to the publicly accessible DM doxygen documentation"
+    print_error "Example: $0 --type master --path /home/foo/public_html/doxygen"
+    print_error "Example: $0 --type Winter2012 ---path /home/foo/public_html/doxygen"
+    print_error "Example: $0 --type stable --path /home/foo/public_html/doxygen"
+    fail
 }
 
 # shellcheck disable=SC2034 disable=SC2054
@@ -28,15 +39,15 @@ do
         --type) DOXY_TYPE="$2";   shift 2 ;;
         --path) INSTALL_ROOT="$2"; shift 2 ;;
         --) shift ; break ;;
-        *) [ "$*" != "" ] && echo "Parsed options; arguments left are:$*:" && exit "$BUILDBOT_FAILURE"
+        *) [ "$*" != "" ] && fail "Parsed options; arguments left are: $*"
             break;;
     esac
 done
 
 if [[ -z "$DOXY_TYPE" || -z "$INSTALL_ROOT" ]]; then
-    echo "***  Missing a required input parameter."
+    print_error "***  Missing a required input parameter."
     usage
-    exit "$BUILDBOT_FAILURE"
+    fail
 fi
 
 DATE="$(date +%Y)_$(date +%m)_$(date +%d)_$(date +%H.%M.%S)"
@@ -49,8 +60,7 @@ if [ "$DOXY_TYPE" == "master" ]; then
     eval "$(grep -E '^BUILD=' "$LSSTSW_BUILD_DIR"/manifest.txt)"
     echo "BUILD: $BUILD"
     if [ -z "$BUILD" ]; then
-        echo "*** Failed: to determine most recent master build number."
-        exit "$BUILDBOT_FAILURE"
+        fail "*** Failed: to determine most recent master build number."
     else
         DOXY_TYPE=$BUILD
     fi
@@ -90,8 +100,7 @@ if ! ( set -e
     # SCM clone lsstDoxygen ** from master **
     git clone "$DOC_REPO_URL" "$DOC_REPO_DIR"
 ); then
-    echo "*** Failed to clone '$DOC_REPO_URL'."
-    exit "$BUILDBOT_FAILURE"
+    fail "*** Failed to clone '$DOC_REPO_URL'."
 fi
 
 # setup all packages required by lsstDoxygen's eups
@@ -104,15 +113,13 @@ eups list -s
 export xlinkdoxy=1
 
 if ! scons; then
-    echo "*** Failed to build lsstDoxygen package."
-    exit "$BUILDBOT_FAILURE"
+    fail "*** Failed to build lsstDoxygen package."
 fi
 
 # Now setup for build of Data Release library documentation
 DATAREL_VERSION=$(eups list -t "$DOXY_TYPE" datarel | awk '{print $1}')
 if [ -z "$DATAREL_VERSION" ]; then
-    echo "*** Failed to find datarel \"$DOXY_TYPE\" version."
-    exit "$BUILDBOT_FAILURE"
+    fail "*** Failed to find datarel \"$DOXY_TYPE\" version."
 fi
 echo "DATAREL_VERSION: $DATAREL_VERSION"
 
@@ -121,13 +128,11 @@ setup datarel "$DATAREL_VERSION"
 eups list -s
 
 if ! "${DOC_REPO_DIR}/bin/makeDocs" --nodot --htmlDir "$HTML_DIR" datarel "$DATAREL_VERSION" > MakeDocs.out; then
-    echo "*** Failed to generate complete makeDocs output for \"$DOXY_TYPE\" source."
-    exit "$BUILDBOT_FAILURE"
+    fail "*** Failed to generate complete makeDocs output for \"$DOXY_TYPE\" source."
 fi
 
 if ! doxygen MakeDocs.out; then
-    echo "*** Failed to generate doxygen documentation for \"$DOXY_TYPE\" source."
-    exit "$BUILDBOT_FAILURE"
+    fail "*** Failed to generate doxygen documentation for \"$DOXY_TYPE\" source."
 fi
 
 # install built doxygen
@@ -136,22 +141,19 @@ if ! ( set -e
     mkdir -p "$INSTALL_ROOT"
     chmod o+rx "$INSTALL_ROOT"
 ); then
-    echo "*** Failed to prepare install root: ${INSTALL_ROOT}"
-    exit "$BUILDBOT_FAILURE"
+    fail "*** Failed to prepare install root: ${INSTALL_ROOT}"
 fi
 
 if ! ( set -e
     cp -ar "$HTML_DIR" "$DOC_INSTALL_DIR"
     chmod o+rx "$DOC_INSTALL_DIR"
 ); then
-    echo "*** Failed to copy doxygen documentation to ${DOC_INSTALL_DIR}"
-    exit "$BUILDBOT_FAILURE"
+    fail "*** Failed to copy doxygen documentation to ${DOC_INSTALL_DIR}"
 fi
 echo "INFO: Doxygen documentation copied to \"$DOC_INSTALL_DIR\""
 
 # symlink the default xlinkdoxy name to new directory.
 if ! ln -snf "$DOC_INSTALL_DIR" "$SYM_LINK_PATH"; then
-    echo "*** Failed to symlink: \"$SYM_LINK_PATH\", to new doxygen documentation: \"$DOC_INSTALL_DIR\""
-    exit "$BUILDBOT_FAILURE"
+    fail "*** Failed to symlink: \"$SYM_LINK_PATH\", to new doxygen documentation: \"$DOC_INSTALL_DIR\""
 fi
 echo "INFO: Updated symlink: \"$SYM_LINK_PATH\", to point to new doxygen documentation: $DOC_INSTALL_DIR."

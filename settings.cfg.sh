@@ -1,12 +1,9 @@
-#! /bin/bash
+#!/bin/bash
+# shellcheck disable=SC2034
 
 # general
 LSSTSW=${LSSTSW:-$HOME/lsstsw}
 LSSTSW_BUILD_DIR=${LSSTSW_BUILD_DIR:-${LSSTSW}/build}
-
-BUILDBOT_SUCCESS=0
-BUILDBOT_FAILURE=1
-BUILDBOT_WARNING=2
 
 # lsstswBuild.sh
 # options passed to ./create_xlinkdocs.sh as cli options

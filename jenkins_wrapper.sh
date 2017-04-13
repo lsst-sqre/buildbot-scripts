@@ -8,7 +8,6 @@
 # The following environment variables are assumed to be declared by the caller:
 #
 # * BRANCH
-# * BUILD_NUMBER
 # * deploy
 # * NO_FETCH
 # * PRODUCT
@@ -32,9 +31,6 @@ if [[ ! -z "$BRANCH" ]]; then
   ARGS+=('--branch')
   ARGS+=("$BRANCH")
 fi
-
-ARGS+=('--build_number')
-ARGS+=("$BUILD_NUMBER")
 
 if [[ ! -z "$PRODUCT" ]]; then
   ARGS+=('--product')
