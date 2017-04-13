@@ -320,6 +320,10 @@ fi
 if [ $RUN_DEMO == "yes" ]; then
     start_section "demo"
 
+    # run demo script from the source checkout dir as it will download and
+    # unpack a tarball
+    cd "$LSSTSW_BUILD_DIR"
+
     print_info "Start Demo run at: $(date)"
     if ! "${SCRIPT_DIR}/runManifestDemo.sh" --tag "$TAG" --small; then
         error "*** There was an error running the simple integration demo."
