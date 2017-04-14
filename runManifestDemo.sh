@@ -122,8 +122,8 @@ SIZE_EXT=""
 
 # shellcheck disable=SC2034
 options=$(getopt -l help,small,tag: -- "$@")
-for i; do
-    case $i in
+while true; do
+    case $1 in
         --help)
             usage
             ;;
@@ -141,6 +141,7 @@ for i; do
             ;;
         *)
             [ "$*" != "" ] && usage
+            break
             ;;
     esac
 done
