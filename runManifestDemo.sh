@@ -158,7 +158,14 @@ DEMO_TGZ=$(mk_archive_filename "$REF")
 DEMO_URL=$(mk_archive_url "$REF")
 DEMO_DIR=$(mk_archive_dirname "$REF")
 
-curl -Lo "$DEMO_TGZ" "$DEMO_URL"
+# disable curl progress meter unless running under a tty -- this is intended to
+# reduce the amount of console output when running under CI
+CURL_OPTS='-#'
+if [[ ! -t 1 ]]; then
+  CURL_OPTS='-sS'
+fi
+
+curl "$CURL_OPTS" -L -o "$DEMO_TGZ" "$DEMO_URL"
 if [[ ! -f $DEMO_TGZ ]]; then
     fail "*** Failed to acquire demo from: ${DEMO_URL}."
 fi
