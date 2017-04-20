@@ -158,7 +158,7 @@ DEMO_TGZ=$(mk_archive_filename "$REF")
 DEMO_URL=$(mk_archive_url "$REF")
 DEMO_DIR=$(mk_archive_dirname "$REF")
 
-curl -kLo "$DEMO_TGZ" "$DEMO_URL"
+curl -Lo "$DEMO_TGZ" "$DEMO_URL"
 if [[ ! -f $DEMO_TGZ ]]; then
     fail "*** Failed to acquire demo from: ${DEMO_URL}."
 fi
