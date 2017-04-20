@@ -187,11 +187,11 @@ eups list  -s
 echo "-----------------------------------------------------------------"
 
 if [[ -z $PIPE_TASKS_DIR || -z $OBS_SDSS_DIR ]]; then
-    fail "*** Failed to setup either PIPE_TASKS or OBS_SDSS; both of  which are required by ${DEMO_BASENAME}"
+    fail "*** Failed to setup either PIPE_TASKS or OBS_SDSS; both of which are required by ${DEMO_DIR}"
 fi
 
 if ! ./bin/demo.sh --$SIZE; then
-    fail "*** Failed during execution of ${DEMO_BASENAME}"
+    fail "*** Failed during execution of ${DEMO_DIR}"
 fi
 
 # Add column position to each label for ease of reading the output comparison
@@ -202,5 +202,5 @@ echo "Columns in benchmark datafile:"
 echo "$NEWCOLUMNS"
 echo "./bin/compare detected-sources${SIZE_EXT}.txt"
 if ! ./bin/compare detected-sources${SIZE_EXT}.txt; then
-    fail "*** Warning: output results not within error tolerance for: ${DEMO_BASENAME}"
+    fail "*** Warning: output results not within error tolerance for: ${DEMO_DIR}"
 fi
