@@ -21,14 +21,20 @@ fail() {
 }
 
 usage() {
-    print_error "Usage: $0 --type <type> --path <doxy docs path>"
-    print_error "Build crosslinked doxygen documentation and install on LSST website."
-    print_error "             type: either <git-branch>,  \"stable\", or \"beta\""
-    print_error "             path: actual path to the publicly accessible DM doxygen documentation"
-    print_error "Example: $0 --type master --path /home/foo/public_html/doxygen"
-    print_error "Example: $0 --type Winter2012 ---path /home/foo/public_html/doxygen"
-    print_error "Example: $0 --type stable --path /home/foo/public_html/doxygen"
-    fail
+    fail "$(cat <<-EOF
+		Usage: $0 --type <type> --path <doxy docs path>
+
+		 Build crosslinked doxygen documentation and install on LSST website.
+
+		 type: either <git-branch>,  \"stable\", or \"beta\"
+		 path: actual path to the publicly accessible DM doxygen documentation
+
+		 Example: $0 --type master --path /home/foo/public_html/doxygen
+		 Example: $0 --type Winter2012 ---path /home/foo/public_html/doxygen
+		 Example: $0 --type stable --path /home/foo/public_html/doxygen
+
+		EOF
+    )"
 }
 
 # shellcheck disable=SC2034 disable=SC2054
@@ -47,7 +53,6 @@ done
 if [[ -z "$DOXY_TYPE" || -z "$INSTALL_ROOT" ]]; then
     print_error "***  Missing a required input parameter."
     usage
-    fail
 fi
 
 DATE="$(date +%Y)_$(date +%m)_$(date +%d)_$(date +%H.%M.%S)"

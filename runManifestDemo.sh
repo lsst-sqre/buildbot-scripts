@@ -106,13 +106,19 @@ find_archive_ref() {
 
 #--------------------------------------------------------------------------
 usage() {
-    print_error "Usage: $0 [options]"
-    print_error "Initiate demonstration run."
-    print_error
-    print_error "Options:"
-    print_error "              --tag <id> : eups-tag for eups-setup or defaults to latest master build."
-    print_error "                 --small : to use small dataset; otherwise a mini-production size will be used."
-    fail
+    fail "$(cat <<-EOF
+
+		Usage: $0 [options]
+		Initiate demonstration run.
+
+		Options:
+		 --tag <id> : eups-tag for eups-setup or defaults to latest master
+		              build.
+		 --small : to use small dataset; otherwise a mini-production size will
+		           be used.
+
+		EOF
+    )"
 }
 
 
@@ -177,14 +183,17 @@ else
     VERSION=$(find . | sort -r -n -t+ +1 -2 | head -1)
     setup lsst_apps "$VERSION"
 fi
+
 #*************************************************************************
-echo "----------------------------------------------------------------"
-echo "EUPS-tag: ${TAG}     Version: ${VERSION}"
-echo "Dataset size: ${SIZE}"
-echo "Current $(umask -p)"
-echo "Setup lsst_apps"
-eups list  -s
-echo "-----------------------------------------------------------------"
+cat <<-EOF
+----------------------------------------------------------------
+EUPS-tag: ${TAG}     Version: ${VERSION}
+Dataset size: ${SIZE}
+Current $(umask -p)
+Setup lsst_apps
+$(eups list  -s)
+-----------------------------------------------------------------
+EOF
 
 if [[ -z $PIPE_TASKS_DIR || -z $OBS_SDSS_DIR ]]; then
     fail "*** Failed to setup either PIPE_TASKS or OBS_SDSS; both of which are required by ${DEMO_DIR}"
@@ -198,9 +207,12 @@ fi
 COLUMNS=$(head -1 detected-sources$SIZE_EXT.txt| sed -e "s/^#//")
 j=1
 NEWCOLUMNS=$(for i in $COLUMNS; do echo -n "$j:$i "; j=$((j+1)); done)
-echo "Columns in benchmark datafile:"
-echo "$NEWCOLUMNS"
-echo "./bin/compare detected-sources${SIZE_EXT}.txt"
+cat <<-EOF
+Columns in benchmark datafile:
+${NEWCOLUMNS}
+./bin/compare detected-sources${SIZE_EXT}.txt
+EOF
+
 if ! ./bin/compare detected-sources${SIZE_EXT}.txt; then
     fail "*** Warning: output results not within error tolerance for: ${DEMO_DIR}"
 fi
