@@ -216,7 +216,7 @@ end_section # environment
 start_section "build"
 
 if [ ! -x "${LSSTSW}/bin/rebuild" ]; then
-     fail "Failed to find 'rebuild'."
+    fail "Failed to find 'rebuild'."
 fi
 
 print_info "Rebuild is commencing....stand by; using $REF_LIST"
@@ -303,8 +303,7 @@ if [ $BUILD_DOCS == "yes" ]; then
     set -e
 
     if [ $RET -ne 0 ]; then
-        print_error "*** FAILURE: Doxygen document was not installed."
-        fail
+        fail "*** FAILURE: Doxygen document was not installed."
     fi
     print_success "Doxygen Documentation was installed successfully."
 
@@ -326,8 +325,7 @@ if [ $RUN_DEMO == "yes" ]; then
 
     print_info "Start Demo run at: $(date)"
     if ! "${SCRIPT_DIR}/runManifestDemo.sh" --tag "$TAG" --small; then
-        print_error "*** There was an error running the simple integration demo."
-        fail
+        fail "*** There was an error running the simple integration demo."
     fi
     print_success "The simple integration demo was successfully run."
 
