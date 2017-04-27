@@ -326,7 +326,7 @@ if [ $RUN_DEMO == "yes" ]; then
 
     print_info "Start Demo run at: $(date)"
     if ! "${SCRIPT_DIR}/runManifestDemo.sh" --tag "$TAG" --small; then
-        error "*** There was an error running the simple integration demo."
+        print_error "*** There was an error running the simple integration demo."
         fail
     fi
     print_success "The simple integration demo was successfully run."
