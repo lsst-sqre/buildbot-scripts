@@ -16,7 +16,7 @@ source "${SCRIPT_DIR}/settings.cfg.sh"
 source "${LSSTSW}/bin/setup.sh"
 
 # Reuse an existing lsstsw installation
-BUILD_DOCS="yes"
+BUILD_DOCS=true
 RUN_DEMO="yes"
 PRODUCT=""
 NO_FETCH=0
@@ -151,7 +151,7 @@ do
     case "$1" in
         --branch)       BRANCH=$2         ; shift 2 ;;
         --product)      PRODUCT=$2        ; shift 2 ;;
-        --skip_docs)    BUILD_DOCS="no"   ; shift 1 ;;
+        --skip_docs)    BUILD_DOCS=false  ; shift 1 ;;
         --skip_demo)    RUN_DEMO="no"     ; shift 1 ;;
         --no-fetch)     NO_FETCH=1        ; shift 1 ;;
         --print-fail)   PRINT_FAIL=1      ; shift 1 ;;
@@ -291,7 +291,7 @@ fi
 #
 # Build doxygen documentation
 #
-if [[ $BUILD_DOCS == yes ]]; then
+if [[ $BUILD_DOCS == true ]]; then
     start_section "doc build"
 
     print_info "Start Documentation build at: $(date)"
