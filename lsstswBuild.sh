@@ -19,7 +19,7 @@ source "${LSSTSW}/bin/setup.sh"
 BUILD_DOCS=true
 RUN_DEMO=true
 PRODUCT=""
-NO_FETCH=0
+NO_FETCH=false
 PRINT_FAIL=0
 COLORIZE=0
 
@@ -153,7 +153,7 @@ do
         --product)      PRODUCT=$2        ; shift 2 ;;
         --skip_docs)    BUILD_DOCS=false  ; shift 1 ;;
         --skip_demo)    RUN_DEMO=false    ; shift 1 ;;
-        --no-fetch)     NO_FETCH=1        ; shift 1 ;;
+        --no-fetch)     NO_FETCH=true     ; shift 1 ;;
         --print-fail)   PRINT_FAIL=1      ; shift 1 ;;
         --color)        COLORIZE=1        ; shift 1 ;;
         --) shift ; break ;;
@@ -220,7 +220,7 @@ fi
 print_info "Rebuild is commencing....stand by; using $REF_LIST"
 
 ARGS=()
-if [[ $NO_FETCH -eq 1 ]]; then
+if [[ $NO_FETCH == true ]]; then
     ARGS+=("-n")
 else
     # el6 has bash < 4.2
