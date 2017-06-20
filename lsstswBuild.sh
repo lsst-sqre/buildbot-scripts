@@ -20,7 +20,7 @@ BUILD_DOCS=true
 RUN_DEMO=true
 PRODUCT=""
 NO_FETCH=false
-PRINT_FAIL=0
+PRINT_FAIL=false
 COLORIZE=0
 
 # Buildbot remotely invokes scripts with a stripped down environment.
@@ -154,7 +154,7 @@ do
         --skip_docs)    BUILD_DOCS=false  ; shift 1 ;;
         --skip_demo)    RUN_DEMO=false    ; shift 1 ;;
         --no-fetch)     NO_FETCH=true     ; shift 1 ;;
-        --print-fail)   PRINT_FAIL=1      ; shift 1 ;;
+        --print-fail)   PRINT_FAIL=true   ; shift 1 ;;
         --color)        COLORIZE=1        ; shift 1 ;;
         --) shift ; break ;;
         *) [[ "$*" != "" ]] && fail "Unknown option: $1"
@@ -280,7 +280,7 @@ end_section # build
 # process/display build failures
 #
 if [[ $BUILD_SUCCESS == false ]]; then
-    if [[ $BUILD_PREPARED == true && $PRINT_FAIL -eq 1 ]]; then
+    if [[ $BUILD_PREPARED == true && $PRINT_FAIL == true ]]; then
         print_build_failure
     fi
 
