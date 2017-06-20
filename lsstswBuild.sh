@@ -176,8 +176,6 @@ settings=(
     BRANCH
     BUILD_DOCS
     COLORIZE
-    DEMO_ROOT
-    DEMO_TGZ
     DOC_PUSH_PATH
     DOC_REPO_DIR
     DOC_REPO_NAME
