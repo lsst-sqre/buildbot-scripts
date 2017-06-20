@@ -45,12 +45,12 @@ do
         --type) DOXY_TYPE="$2";   shift 2 ;;
         --path) INSTALL_ROOT="$2"; shift 2 ;;
         --) shift ; break ;;
-        *) [ "$*" != "" ] && fail "Parsed options; arguments left are: $*"
+        *) [[ "$*" != "" ]] && fail "Parsed options; arguments left are: $*"
             break;;
     esac
 done
 
-if [[ -z "$DOXY_TYPE" || -z "$INSTALL_ROOT" ]]; then
+if [[ -z $DOXY_TYPE || -z $INSTALL_ROOT ]]; then
     print_error "***  Missing a required input parameter."
     usage
 fi
@@ -61,10 +61,10 @@ DATE="$(date +%Y)_$(date +%m)_$(date +%d)_$(date +%H.%M.%S)"
 #   but doxy_type for master branch will now change to the tag name used
 #   for a master build
 NORMATIVE_DOXY_TYPE=$(echo "$DOXY_TYPE" | tr  "/" "_")
-if [ "$DOXY_TYPE" == "master" ]; then
+if [[ $DOXY_TYPE == master ]]; then
     eval "$(grep -E '^BUILD=' "$LSSTSW_BUILD_DIR"/manifest.txt)"
     echo "BUILD: $BUILD"
-    if [ -z "$BUILD" ]; then
+    if [[ -z $BUILD ]]; then
         fail "*** Failed: to determine most recent master build number."
     else
         DOXY_TYPE=$BUILD
@@ -123,7 +123,7 @@ fi
 
 # Now setup for build of Data Release library documentation
 DATAREL_VERSION=$(eups list -t "$DOXY_TYPE" datarel | awk '{print $1}')
-if [ -z "$DATAREL_VERSION" ]; then
+if [[ -z $DATAREL_VERSION ]]; then
     fail "*** Failed to find datarel \"$DOXY_TYPE\" version."
 fi
 echo "DATAREL_VERSION: $DATAREL_VERSION"

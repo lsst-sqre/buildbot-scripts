@@ -146,7 +146,7 @@ while true; do
             break
             ;;
         *)
-            [ "$*" != "" ] && usage
+            [[ "$*" != "" ]] && usage
             break
             ;;
     esac

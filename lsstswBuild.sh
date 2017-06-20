@@ -32,13 +32,13 @@ sbar=$(printf %78s |tr " " "-")
 tbar=$(printf %78s |tr " " "~")
 
 set_color() {
-    if [ $COLORIZE -eq 1 ]; then
+    if [[ $COLORIZE -eq 1 ]]; then
         echo -ne "$@"
     fi
 }
 
 no_color() {
-    if [ $COLORIZE -eq 1 ]; then
+    if [[ $COLORIZE -eq 1 ]]; then
         echo -ne "$NO_COLOR"
     fi
 }
@@ -97,7 +97,7 @@ print_build_failure() {
         local config_log=${build_dir}/config.log
 
         # check to see if build log exists
-        if [ ! -e "$build_log" ]; then
+        if [[ ! -e $build_log ]]; then
             # no log means that package was not [attempted] to be be built
             # on this run
             continue
@@ -113,29 +113,29 @@ print_build_failure() {
         local test_error=false
         shopt -s nullglob
         local failed_tests=(${test_dir}/*.failed)
-        if [ ${#failed_tests[@]} -ne 0 ]; then
+        if [[ ${#failed_tests[@]} -ne 0 ]]; then
             test_error=true
         fi
 
         local log_files=() # array of logs to print
 
         # if any errors were detected for this package...
-        if [[ "$build_error" == true || "$test_error" == true ]]; then
+        if [[ $build_error == true || $test_error == true ]]; then
             # print _build.log
             log_files=("${log_files[@]}" "$build_log")
 
             # print config.log (if it exists)
-            if [ -e "$config_log" ]; then
+            if [[ -e $config_log ]]; then
                 log_files=("${log_files[@]}" "$config_log")
             fi
         fi
 
         # and print any failed tests
-        if [[ "$test_error" == true ]]; then
+        if [[ $test_error == true ]]; then
             log_files=("${log_files[@]}" "${failed_tests[@]}")
         fi
 
-        if [ ${#log_files[@]} -ne 0 ]; then
+        if [[ ${#log_files[@]} -ne 0 ]]; then
             for log in "${log_files[@]}"; do
                 print_log_file "$pkg" "$log"
             done
@@ -157,7 +157,7 @@ do
         --print-fail)   PRINT_FAIL=1      ; shift 1 ;;
         --color)        COLORIZE=1        ; shift 1 ;;
         --) shift ; break ;;
-        *) [ "$*" != "" ] && fail "Unknown option: $1"
+        *) [[ "$*" != "" ]] && fail "Unknown option: $1"
            break;;
     esac
 done
@@ -213,26 +213,26 @@ end_section # environment
 #
 start_section "build"
 
-if [ ! -x "${LSSTSW}/bin/rebuild" ]; then
+if [[ ! -x ${LSSTSW}/bin/rebuild ]]; then
     fail "Failed to find 'rebuild'."
 fi
 
 print_info "Rebuild is commencing....stand by; using $REF_LIST"
 
 ARGS=()
-if [ $NO_FETCH -eq 1 ]; then
+if [[ $NO_FETCH -eq 1 ]]; then
     ARGS+=("-n")
 else
     # el6 has bash < 4.2
-    if [[ ! -n "${REPOSFILE+1}" ]]; then
+    if [[ ! -n ${REPOSFILE+1} ]]; then
         ARGS+=("-u")
     fi
 fi
-if [[ ! -z "$REF_LIST" ]]; then
+if [[ ! -z $REF_LIST ]]; then
     # XXX intentionally not quoted to allow word splitting
     ARGS+=($REF_LIST)
 fi
-if [[ ! -z "$PRODUCT" ]]; then
+if [[ ! -z $PRODUCT ]]; then
     # XXX intentionally not quoted to allow word splitting
     ARGS+=($PRODUCT)
 fi
@@ -246,7 +246,7 @@ set +e
 RET=$?
 set -e
 
-if [ $RET -eq 0 ]; then
+if [[ $RET -eq 0 ]]; then
     BUILD_PREPARED=true
     BUILD_SUCCESS=true
 else
@@ -291,7 +291,7 @@ fi
 #
 # Build doxygen documentation
 #
-if [ $BUILD_DOCS == "yes" ]; then
+if [[ $BUILD_DOCS == yes ]]; then
     start_section "doc build"
 
     print_info "Start Documentation build at: $(date)"
@@ -300,7 +300,7 @@ if [ $BUILD_DOCS == "yes" ]; then
     RET=$?
     set -e
 
-    if [ $RET -ne 0 ]; then
+    if [[ $RET -ne 0 ]]; then
         fail "*** FAILURE: Doxygen document was not installed."
     fi
     print_success "Doxygen Documentation was installed successfully."
@@ -314,7 +314,7 @@ fi
 #
 # Finally run a simple test of package integration
 #
-if [ $RUN_DEMO == "yes" ]; then
+if [[ $RUN_DEMO == yes ]]; then
     start_section "demo"
 
     # run demo script from the source checkout dir as it will download and
