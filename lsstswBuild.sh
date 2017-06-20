@@ -17,7 +17,7 @@ source "${LSSTSW}/bin/setup.sh"
 
 # Reuse an existing lsstsw installation
 BUILD_DOCS=true
-RUN_DEMO="yes"
+RUN_DEMO=true
 PRODUCT=""
 NO_FETCH=0
 PRINT_FAIL=0
@@ -152,7 +152,7 @@ do
         --branch)       BRANCH=$2         ; shift 2 ;;
         --product)      PRODUCT=$2        ; shift 2 ;;
         --skip_docs)    BUILD_DOCS=false  ; shift 1 ;;
-        --skip_demo)    RUN_DEMO="no"     ; shift 1 ;;
+        --skip_demo)    RUN_DEMO=false    ; shift 1 ;;
         --no-fetch)     NO_FETCH=1        ; shift 1 ;;
         --print-fail)   PRINT_FAIL=1      ; shift 1 ;;
         --color)        COLORIZE=1        ; shift 1 ;;
@@ -314,7 +314,7 @@ fi
 #
 # Finally run a simple test of package integration
 #
-if [[ $RUN_DEMO == yes ]]; then
+if [[ $RUN_DEMO == true ]]; then
     start_section "demo"
 
     # run demo script from the source checkout dir as it will download and
