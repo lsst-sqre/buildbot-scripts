@@ -21,7 +21,7 @@ RUN_DEMO=true
 PRODUCT=""
 NO_FETCH=false
 PRINT_FAIL=false
-COLORIZE=0
+COLORIZE=false
 
 # Buildbot remotely invokes scripts with a stripped down environment.
 umask 002
@@ -32,13 +32,13 @@ sbar=$(printf %78s |tr " " "-")
 tbar=$(printf %78s |tr " " "~")
 
 set_color() {
-    if [[ $COLORIZE -eq 1 ]]; then
+    if [[ $COLORIZE == true ]]; then
         echo -ne "$@"
     fi
 }
 
 no_color() {
-    if [[ $COLORIZE -eq 1 ]]; then
+    if [[ $COLORIZE == true ]]; then
         echo -ne "$NO_COLOR"
     fi
 }
@@ -155,7 +155,7 @@ do
         --skip_demo)    RUN_DEMO=false    ; shift 1 ;;
         --no-fetch)     NO_FETCH=true     ; shift 1 ;;
         --print-fail)   PRINT_FAIL=true   ; shift 1 ;;
-        --color)        COLORIZE=1        ; shift 1 ;;
+        --color)        COLORIZE=true     ; shift 1 ;;
         --) shift ; break ;;
         *) [[ "$*" != "" ]] && fail "Unknown option: $1"
            break;;
