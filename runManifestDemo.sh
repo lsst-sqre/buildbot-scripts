@@ -9,90 +9,90 @@ DEMO_BASE_URL=${DEMO_BASE_URL:-https://github.com/lsst/lsst_dm_stack_demo/archiv
 DEMO_BASE_DIR=${DEMO_BASE_DIR:-lsst_dm_stack_demo}
 
 print_error() {
-    >&2 echo -e "$@"
+  >&2 echo -e "$@"
 }
 
 fail() {
-    local code=${2:-1}
-    [[ -n $1 ]] && print_error "$1"
-    # shellcheck disable=SC2086
-    exit $code
+  local code=${2:-1}
+  [[ -n $1 ]] && print_error "$1"
+  # shellcheck disable=SC2086
+  exit $code
 }
 
 setup() {
-    # eval masks all errors
-    if ! type -p eups_setup; then
-        fail "unable to find eups_setup"
-    fi
-    eval "$(eups_setup DYLD_LIBRARY_PATH="${DYLD_LIBRARY_PATH}" "$@")"
+  # eval masks all errors
+  if ! type -p eups_setup; then
+    fail "unable to find eups_setup"
+  fi
+  eval "$(eups_setup DYLD_LIBRARY_PATH="${DYLD_LIBRARY_PATH}" "$@")"
 }
 
 deeupsify_tag() {
-    local eups_tag=${1?eups_tag parameter is required}
+  local eups_tag=${1?eups_tag parameter is required}
 
-    # convert _ -> .
-    git_tag=${eups_tag//_/.}
+  # convert _ -> .
+  git_tag=${eups_tag//_/.}
 
-    # remove leading v
-    git_tag=${git_tag#v}
+  # remove leading v
+  git_tag=${git_tag#v}
 
-    echo "$git_tag"
+  echo "$git_tag"
 }
 
 mk_archive_url() {
-    local ref=${1?ref parameter is required}
+  local ref=${1?ref parameter is required}
 
-    echo "${DEMO_BASE_URL}/${ref}.tar.gz"
+  echo "${DEMO_BASE_URL}/${ref}.tar.gz"
 }
 
 mk_archive_dirname() {
-    local ref=${1?ref parameter is required}
+  local ref=${1?ref parameter is required}
 
-    echo "${DEMO_BASE_DIR}-${ref}"
+  echo "${DEMO_BASE_DIR}-${ref}"
 }
 
 mk_archive_filename() {
-    local ref=${1?ref parameter is required}
+  local ref=${1?ref parameter is required}
 
-    echo "$(mk_archive_dirname "$ref").tar.gz"
+  echo "$(mk_archive_dirname "$ref").tar.gz"
 }
 
 check_archive_ref() {
-    local ref=${1?ref parameter is required}
+  local ref=${1?ref parameter is required}
 
-    local url
-    url=$(mk_archive_url "$ref")
-    if curl -Ls --fail --head -o /dev/null "$url"; then
-        return 0
-    fi
+  local url
+  url=$(mk_archive_url "$ref")
+  if curl -Ls --fail --head -o /dev/null "$url"; then
+    return 0
+  fi
 
-    return 1
+  return 1
 }
 
 find_archive_ref() {
-    local tag=$1
+  local tag=$1
 
-    local ref
-    local -a candidate_refs
+  local ref
+  local -a candidate_refs
 
-    if [[ -n $tag ]]; then
-        candidate_refs=(
-            "$tag"
-            $(deeupsify_tag "$tag")
-        )
+  if [[ -n $tag ]]; then
+    candidate_refs=(
+      "$tag"
+      $(deeupsify_tag "$tag")
+    )
+  fi
+
+  candidate_refs+=( master )
+
+  for r in ${candidate_refs[*]}; do
+    [[ -z $r ]] && continue
+    if check_archive_ref "$r"; then
+      ref=$r
+      break
     fi
+  done
 
-    candidate_refs+=( master )
-
-    for r in ${candidate_refs[*]}; do
-      [[ -z $r ]] && continue
-      if check_archive_ref "$r"; then
-          ref=$r
-          break
-      fi
-    done
-
-    echo "$ref"
+  echo "$ref"
 }
 
 #--------------------------------------------------------------------------
@@ -106,7 +106,8 @@ find_archive_ref() {
 
 #--------------------------------------------------------------------------
 usage() {
-    fail "$(cat <<-EOF
+  # note that heredocs are prefixed with tab chars
+  fail "$(cat <<-EOF
 
 		Usage: $0 [options]
 		Initiate demonstration run.
@@ -118,7 +119,7 @@ usage() {
 		           be used.
 
 		EOF
-    )"
+  )"
 }
 
 
@@ -129,29 +130,28 @@ SIZE_EXT=""
 # shellcheck disable=SC2034
 options=$(getopt -l help,small,tag: -- "$@")
 while true; do
-    case $1 in
-        --help)
-            usage
-            ;;
-        --small)
-            SIZE="small";
-            SIZE_EXT="_small";
-            shift 1
-            ;;
-        --tag)
-            TAG=$2;
-            shift 2
-            ;;
-        --)
-            break
-            ;;
-        *)
-            [[ "$*" != "" ]] && usage
-            break
-            ;;
-    esac
+  case $1 in
+    --help)
+        usage
+        ;;
+    --small)
+        SIZE="small";
+        SIZE_EXT="_small";
+        shift 1
+        ;;
+    --tag)
+        TAG=$2;
+        shift 2
+        ;;
+    --)
+        break
+        ;;
+    *)
+        [[ "$*" != "" ]] && usage
+        break
+        ;;
+  esac
 done
-
 
 REF=$(find_archive_ref "$TAG")
 DEMO_TGZ=$(mk_archive_filename "$REF")
@@ -167,28 +167,28 @@ fi
 
 curl "$CURL_OPTS" -L -o "$DEMO_TGZ" "$DEMO_URL"
 if [[ ! -f $DEMO_TGZ ]]; then
-    fail "*** Failed to acquire demo from: ${DEMO_URL}."
+  fail "*** Failed to acquire demo from: ${DEMO_URL}."
 fi
 
 echo "tar xzf ${DEMO_TGZ}"
 if ! tar xzf "$DEMO_TGZ"; then
-    fail "*** Failed to unpack: ${DEMO_TGZ}"
+  fail "*** Failed to unpack: ${DEMO_TGZ}"
 fi
 
 if [[ ! -d $DEMO_DIR ]]; then
-    fail "*** Failed to find unpacked directory: ${DEMO_DIR}"
+  fail "*** Failed to find unpacked directory: ${DEMO_DIR}"
 fi
 
 cd "$DEMO_DIR"
 
 # Setup either requested tag or last successfully built lsst_apps
 if [[ -n $TAG ]]; then
-    setup -t "$TAG" lsst_apps
+  setup -t "$TAG" lsst_apps
 else
-    setup -j lsst_apps
-    cd "${LSST_APPS_DIR}/../"
-    VERSION=$(find . | sort -r -n -t+ +1 -2 | head -1)
-    setup lsst_apps "$VERSION"
+  setup -j lsst_apps
+  cd "${LSST_APPS_DIR}/../"
+  VERSION=$(find . | sort -r -n -t+ +1 -2 | head -1)
+  setup lsst_apps "$VERSION"
 fi
 
 #*************************************************************************
@@ -203,11 +203,11 @@ $(eups list  -s)
 EOF
 
 if [[ -z $PIPE_TASKS_DIR || -z $OBS_SDSS_DIR ]]; then
-    fail "*** Failed to setup either PIPE_TASKS or OBS_SDSS; both of which are required by ${DEMO_DIR}"
+  fail "*** Failed to setup either PIPE_TASKS or OBS_SDSS; both of which are required by ${DEMO_DIR}"
 fi
 
 if ! ./bin/demo.sh --$SIZE; then
-    fail "*** Failed during execution of ${DEMO_DIR}"
+  fail "*** Failed during execution of ${DEMO_DIR}"
 fi
 
 # Add column position to each label for ease of reading the output comparison
@@ -221,5 +221,7 @@ ${NEWCOLUMNS}
 EOF
 
 if ! ./bin/compare detected-sources${SIZE_EXT}.txt; then
-    fail "*** Warning: output results not within error tolerance for: ${DEMO_DIR}"
+  fail "*** Warning: output results not within error tolerance for: ${DEMO_DIR}"
 fi
+
+# vim: tabstop=2 shiftwidth=2 expandtab

@@ -54,7 +54,7 @@ fi
 
 set -o verbose
 if grep -q -i "CentOS release 6" /etc/redhat-release 2>/dev/null; then
-    # shellcheck disable=SC1091
+  # shellcheck disable=SC1091
   . /opt/rh/devtoolset-3/enable
 fi
 set +o verbose
@@ -78,8 +78,8 @@ esac
 # unable to access injected credentials env vars from inside an
 # environmentVariables block.
 if [[ -n $CMIRROR_S3_BUCKET ]]; then
-    export CONDA_CHANNELS="http://${CMIRROR_S3_BUCKET}/pkgs/free"
-    export MINICONDA_BASE_URL="http://${CMIRROR_S3_BUCKET}/miniconda"
+  export CONDA_CHANNELS="http://${CMIRROR_S3_BUCKET}/pkgs/free"
+  export MINICONDA_BASE_URL="http://${CMIRROR_S3_BUCKET}/miniconda"
 fi
 
 (
@@ -101,3 +101,5 @@ fi
 )
 
 "$(cd "$(dirname "$0")"; pwd)/lsstswBuild.sh" "${ARGS[@]}"
+
+# vim: tabstop=2 shiftwidth=2 expandtab
