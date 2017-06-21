@@ -19,42 +19,42 @@
 ARGS=()
 
 # append lsst_ci to PRODUCT list unless SKIP_DEMO is set
-if [[ $SKIP_DEMO != "true" ]]; then
-  if [[ -z "$PRODUCT" ]]; then
+if [[ $SKIP_DEMO != true ]]; then
+  if [[ -z $PRODUCT ]]; then
     # lsstsw default targets
     PRODUCT="lsst_distrib qserv_distrib dax_webserv"
   fi
   PRODUCT="$PRODUCT lsst_ci"
 fi
 
-if [[ ! -z "$BRANCH" ]]; then
+if [[ ! -z $BRANCH ]]; then
   ARGS+=('--branch')
   ARGS+=("$BRANCH")
 fi
 
-if [[ ! -z "$PRODUCT" ]]; then
+if [[ ! -z $PRODUCT ]]; then
   ARGS+=('--product')
   ARGS+=("$PRODUCT")
 fi
 
-if [[ $SKIP_DOCS == "true" ]]; then
+if [[ $SKIP_DOCS == true ]]; then
   ARGS+=('--skip_docs')
 fi
 
 ARGS+=('--print-fail')
 ARGS+=('--color')
 
-if [[ $SKIP_DEMO == "true" ]]; then
+if [[ $SKIP_DEMO == true ]]; then
   ARGS+=('--skip_demo')
 fi
 
-if [[ $NO_FETCH == "true" ]]; then
+if [[ $NO_FETCH == true ]]; then
   ARGS+=('--no-fetch')
 fi
 
 set -o verbose
 if grep -q -i "CentOS release 6" /etc/redhat-release 2>/dev/null; then
-    # shellcheck disable=SC1091
+  # shellcheck disable=SC1091
   . /opt/rh/devtoolset-3/enable
 fi
 set +o verbose
@@ -78,8 +78,8 @@ esac
 # unable to access injected credentials env vars from inside an
 # environmentVariables block.
 if [[ -n $CMIRROR_S3_BUCKET ]]; then
-    export CONDA_CHANNELS="http://${CMIRROR_S3_BUCKET}/pkgs/free"
-    export MINICONDA_BASE_URL="http://${CMIRROR_S3_BUCKET}/miniconda"
+  export CONDA_CHANNELS="http://${CMIRROR_S3_BUCKET}/pkgs/free"
+  export MINICONDA_BASE_URL="http://${CMIRROR_S3_BUCKET}/miniconda"
 fi
 
 (
@@ -88,12 +88,12 @@ fi
   OPTS=()
 
   # shellcheck disable=SC2154
-  if [[ "$python" == "py3" ]]; then
+  if [[ $python == py3 ]]; then
     OPTS+=('-3')
   fi
 
   # shellcheck disable=SC2154
-  if [[ $deploy == "bleed" ]]; then
+  if [[ $deploy == bleed ]]; then
     OPTS+=('-b')
   fi
 
@@ -101,3 +101,5 @@ fi
 )
 
 "$(cd "$(dirname "$0")"; pwd)/lsstswBuild.sh" "${ARGS[@]}"
+
+# vim: tabstop=2 shiftwidth=2 expandtab
