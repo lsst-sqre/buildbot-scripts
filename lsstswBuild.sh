@@ -222,11 +222,6 @@ print_info "Rebuild is commencing....stand by; using $REF_LIST"
 ARGS=()
 if [[ $NO_FETCH == true ]]; then
   ARGS+=("-n")
-else
-  # el6 has bash < 4.2
-  if [[ ! -n ${REPOSFILE+1} ]]; then
-    ARGS+=("-u")
-  fi
 fi
 if [[ ! -z $REF_LIST ]]; then
   # XXX intentionally not quoted to allow word splitting
