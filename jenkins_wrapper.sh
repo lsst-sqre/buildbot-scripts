@@ -88,8 +88,19 @@ fi
   OPTS=()
 
   # shellcheck disable=SC2154
-  if [[ $python == py3 ]]; then
-    OPTS+=('-3')
+  if [[ -n ${python+1} ]]; then
+    case $python in
+      py2)
+        OPTS+=('-2')
+        ;;
+      py3)
+        OPTS+=('-3')
+        ;;
+      *)
+        >&2 echo "unsupported python version: $python"
+        exit 1
+        ;;
+    esac
   fi
 
   # shellcheck disable=SC2154
