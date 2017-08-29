@@ -41,7 +41,6 @@ if [[ $SKIP_DOCS == true ]]; then
   ARGS+=('--skip_docs')
 fi
 
-ARGS+=('--print-fail')
 ARGS+=('--color')
 
 if [[ $SKIP_DEMO == true ]]; then
