@@ -96,7 +96,7 @@ settings=(
 
 for i in ${settings[*]}
 do
-  eval echo "${i}: \$$i"
+  echo "${i}: ${!i}"
 done
 
 if ! ( set -e
