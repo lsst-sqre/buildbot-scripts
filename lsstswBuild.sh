@@ -191,7 +191,7 @@ settings=(
 set_color "$LIGHT_CYAN"
 for i in ${settings[*]}
 do
-  eval echo "${i}: \$$i"
+  echo "${i}: ${!i}"
 done
 no_color
 
