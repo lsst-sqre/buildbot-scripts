@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -xe
 
 SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 # shellcheck source=./ccutils.sh
