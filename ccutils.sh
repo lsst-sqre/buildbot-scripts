@@ -30,6 +30,12 @@ cc::check_sys_cc() {
   fi
 }
 
+cc::check_scl_collection() {
+  local collection=${1?collection is required}
+
+  scl --list | grep --quiet "$collection"
+}
+
 # Ensure that the desired cc will be in use either by managling the env to
 # configure that compiler as the "default" or by verifying that it is already
 # the default CC
@@ -40,11 +46,7 @@ cc::setup() {
 
   case $compiler in
     devtoolset-*):
-      enable_script=/opt/rh/${compiler}/enable
-
-      if [[ ! -e $enable_script ]]; then
-        cc::fail "${compiler} enable script is missing"
-      fi
+      cc::check_scl_collection "$compiler"
 
       # force verbose for enable script so we know something happened
       local opts
