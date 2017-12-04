@@ -1,4 +1,10 @@
-#!/bin/bash -e
+#!/bin/bash
+
+set -xe
+
+SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
+# shellcheck source=./ccutils.sh
+source "${SCRIPT_DIR}/ccutils.sh"
 
 # This script is a thin wrapper around `lsstswBuild.sh` and is only intended to
 # be useful when executed by jenkins.  It assumes that the `lsst/lsstsw` and
@@ -51,12 +57,13 @@ if [[ $NO_FETCH == true ]]; then
   ARGS+=('--no-fetch')
 fi
 
-set -o verbose
-if grep -q -i "CentOS release 6" /etc/redhat-release 2>/dev/null; then
-  # shellcheck disable=SC1091
-  . /opt/rh/devtoolset-3/enable
+# require that $LSST_COMPILER is defined
+if [[ -z $LSST_COMPILER ]]; then
+  >&2 echo -e 'LSST_COMPILER is not defined'
+  exit 1
 fi
-set +o verbose
+
+cc::setup "$LSST_COMPILER"
 
 export LSSTSW=${LSSTSW:-$WORKSPACE/lsstsw}
 
@@ -110,6 +117,6 @@ fi
   ./bin/deploy "${OPTS[@]}"
 )
 
-"$(cd "$(dirname "$0")"; pwd)/lsstswBuild.sh" "${ARGS[@]}"
+"${SCRIPT_DIR}/lsstswBuild.sh" "${ARGS[@]}"
 
 # vim: tabstop=2 shiftwidth=2 expandtab
