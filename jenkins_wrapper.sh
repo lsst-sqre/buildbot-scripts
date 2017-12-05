@@ -96,10 +96,10 @@ fi
   # shellcheck disable=SC2154
   if [[ -n ${python+1} ]]; then
     case $python in
-      py2)
+      2)
         OPTS+=('-2')
         ;;
-      py3)
+      3)
         OPTS+=('-3')
         ;;
       *)
