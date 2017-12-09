@@ -17,7 +17,8 @@ source "${SCRIPT_DIR}/ccutils.sh"
 # * deploy
 # * NO_FETCH
 # * PRODUCT
-# * python
+# * LSST_COMPILER
+# * LSST_PYTHON_VERSION
 # * SKIP_DEMO
 # * SKIP_DOCS
 #
@@ -93,17 +94,16 @@ fi
 
   OPTS=()
 
-  # shellcheck disable=SC2154
-  if [[ -n ${python+1} ]]; then
-    case $python in
-      py2)
+  if [[ -n ${LSST_PYTHON_VERSION+1} ]]; then
+    case $LSST_PYTHON_VERSION in
+      2)
         OPTS+=('-2')
         ;;
-      py3)
+      3)
         OPTS+=('-3')
         ;;
       *)
-        >&2 echo "unsupported python version: $python"
+        >&2 echo "unsupported python version: $LSST_PYTHON_VERSION"
         exit 1
         ;;
     esac
