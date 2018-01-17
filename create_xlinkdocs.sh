@@ -77,7 +77,7 @@ SYM_LINK_PATH="${INSTALL_ROOT}/${SYM_LINK_NAME}"
 DOC_NAME="xlink_${NORMATIVE_DOXY_TYPE}_$DATE"
 DOC_INSTALL_DIR="${INSTALL_ROOT}/${DOC_NAME}"
 HTML_DIR="${DOC_REPO_DIR}/doc/html"
-DOC_PKG='datarel'
+DOC_PKG='lsst_distrib'
 
 # print "settings"
 settings=(
