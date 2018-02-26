@@ -49,8 +49,8 @@ cc::setup() {
       cc::check_scl_collection "$compiler"
 
       # force verbose for enable script so we know something happened
-      local opts
-      opts=$(set +o)
+      local shopts
+      shopts=$(set +o)
       set -o verbose
 
       # XXX scl_source seems to be broken on el6 as `/usr/bin/scl_enabled
@@ -62,6 +62,7 @@ cc::setup() {
 
       # suppress verbose for eval
       set +o verbose
+      eval "$shopts"
       ;;
     gcc-system)
       cc_path=$(type -p gcc)
