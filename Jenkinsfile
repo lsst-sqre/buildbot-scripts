@@ -1,15 +1,41 @@
-node('docker') {
-  checkout scm
+def tests = [:]
 
-  docker.image('docker.io/ruby:2.4.2').inside("-e HOME=${pwd()}") {
-    stage('setup') {
+tests['rspec'] = {
+  node('docker') {
+    checkout scm
+
+    docker.image('docker.io/ruby:2.4.2').inside("-e HOME=${pwd()}") {
       sh 'bundle install'
-    }
-    stage('rubocop') {
       sh 'bundle exec rubocop'
-    }
-    stage('rspec') {
       sh 'bundle exec rspec --format doc'
+    } // .inside
+  } // node
+}
+
+tests['shellcheck'] = {
+  node('docker') {
+    deleteDir()
+
+    dir('lsstsw') {
+      git([
+        url: 'https://github.com/lsst/lsstsw',
+        branch: 'master',
+      ])
     }
-  }
+
+    dir('ci-scripts') {
+      checkout scm
+    }
+
+    docker.image('koalaman/shellcheck-alpine:v0.4.6').inside("-e HOME=${pwd()}") {
+      // sadly, dir() doesn't work inside of containers...
+      // we can't dir before .inside() either as we want the workspace root to
+      // be mounted inside the container so ./lsstsw is accessible
+      sh 'cd ci-scripts; shellcheck -x *.sh'
+    } // .inside
+  } // node
+}
+
+stage('tests') {
+  parallel tests
 }
