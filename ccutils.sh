@@ -71,7 +71,7 @@ cc::setup() {
       cc::check_cc_path "$cc_path"
       cc::check_sys_cc "$cc_path" "$sys_cc_path"
       ;;
-    clang-*)
+    clang* | ^clang*)
       cc_path=$(type -p clang)
       sys_cc_path='/usr/bin/clang'
 
@@ -86,7 +86,7 @@ cc::setup() {
       fi
       cc_version="${BASH_REMATCH[1]}"
 
-      if [[ $cc_version != "$compiler" ]]; then
+      if [[ ! $cc_version =~ $compiler ]]; then
         cc::fail "found clang $cc_version but expected $compiler"
       fi
       ;;
