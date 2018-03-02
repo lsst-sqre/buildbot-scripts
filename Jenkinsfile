@@ -4,8 +4,9 @@ tests['rspec'] = {
   node('docker') {
     checkout scm
 
-    docker.image('docker.io/ruby:2.4.2').inside("-e HOME=${pwd()}") {
-      sh 'bundle install'
+    // rspec-bash needs ruby + netcat
+    docker.image('lsstsqre/rspec-bash-env:latest').inside("-e HOME=${pwd()}") {
+      sh 'bundle install --path .bundle'
       sh 'bundle exec rubocop'
       sh 'bundle exec rspec --format doc'
     } // .inside
