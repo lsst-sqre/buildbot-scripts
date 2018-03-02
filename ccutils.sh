@@ -65,14 +65,18 @@ cc::setup() {
       eval "$shopts"
       ;;
     gcc-system)
+      set +e
       cc_path=$(type -p gcc)
+      set -e
       sys_cc_path='/usr/bin/gcc'
 
       cc::check_cc_path "$cc_path"
       cc::check_sys_cc "$cc_path" "$sys_cc_path"
       ;;
     clang* | ^clang*)
+      set +e
       cc_path=$(type -p clang)
+      set -e
       sys_cc_path='/usr/bin/clang'
 
       cc::check_cc_path "$cc_path"
