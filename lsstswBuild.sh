@@ -75,7 +75,8 @@ start_section() {
 
 end_section() {
   print_info "$sbar"
-  echo -ne "\n"
+  # print a newline
+  echo
 }
 
 # XXX REF_LIST and PRODUCT would be better handled as arrays
@@ -97,7 +98,7 @@ do
 done
 
 # mangle whitespace and prepend ` -r ` in front of each ref
-REF_LIST=$(echo "$BRANCH" | sed  -e "s/ \+ / /g" -e "s/^/ /" -e "s/ $//" -e "s/ / -r /g")
+REF_LIST=$(echo "$BRANCH" | sed  -e 's/ \+ / /g' -e 's/^/ /' -e 's/ $//' -e 's/ / -r /g')
 
 
 #
@@ -159,10 +160,12 @@ if [[ $NO_FETCH == true ]]; then
 fi
 if [[ ! -z $REF_LIST ]]; then
   # XXX intentionally not quoted to allow word splitting
+  # shellcheck disable=SC2206
   ARGS+=($REF_LIST)
 fi
 if [[ ! -z $PRODUCT ]]; then
   # XXX intentionally not quoted to allow word splitting
+  # shellcheck disable=SC2206
   ARGS+=($PRODUCT)
 fi
 set -e
