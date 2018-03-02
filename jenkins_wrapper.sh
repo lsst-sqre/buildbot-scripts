@@ -64,7 +64,7 @@ if [[ -z $LSST_COMPILER ]]; then
   exit 1
 fi
 
-cc::setup "$LSST_COMPILER"
+cc::setup_first "$LSST_COMPILER"
 
 export LSSTSW=${LSSTSW:-$WORKSPACE/lsstsw}
 
