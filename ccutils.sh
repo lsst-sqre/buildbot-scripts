@@ -100,4 +100,30 @@ cc::setup() {
   esac
 }
 
+# Accept/setup the first compiler, starting from the left hand side, of the
+# space seperated list of compiler strings.
+cc::setup_first() {
+  local compilers=${1?compilers string is required}
+
+  declare -a canidates=($compilers)
+  # this... intersting expression is required to work with bash < 4.2 -- thank
+  # you OSX
+  local last=${canidates[${#canidates[@]}-1]}
+
+  for cc in "${canidates[@]}"; do
+    if [[ $cc == "$last" ]]; then
+      # allow stdout/stderr/exit output from final canidate
+      cc::setup "$cc"
+    else
+      set +e
+      # block stdout/stderr/exit from candiates that may fail
+      # using a subshell to ignore exit
+      if (cc::setup "$cc" > /dev/null 2>&1); then
+        break
+      fi
+      set -e
+    fi
+  done
+}
+
 # vim: tabstop=2 shiftwidth=2 expandtab
