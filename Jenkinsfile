@@ -28,7 +28,7 @@ tests['shellcheck'] = {
       checkout scm
     }
 
-    docker.image('koalaman/shellcheck-alpine:v0.4.6').inside("-e HOME=${pwd()}") {
+    docker.image('koalaman/shellcheck-alpine:v0.4.6').inside("--entrypoint='' -e HOME=${pwd()}") {
       // sadly, dir() doesn't work inside of containers...
       // we can't dir before .inside() either as we want the workspace root to
       // be mounted inside the container so ./lsstsw is accessible
