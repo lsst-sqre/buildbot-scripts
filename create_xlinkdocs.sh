@@ -77,12 +77,14 @@ SYM_LINK_PATH="${INSTALL_ROOT}/${SYM_LINK_NAME}"
 DOC_NAME="xlink_${NORMATIVE_DOXY_TYPE}_$DATE"
 DOC_INSTALL_DIR="${INSTALL_ROOT}/${DOC_NAME}"
 HTML_DIR="${DOC_REPO_DIR}/doc/html"
+DOC_PKG='lsst_distrib'
 
 # print "settings"
 settings=(
   DATE
   DOC_INSTALL_DIR
   DOC_NAME
+  DOC_PKG
   DOC_REPO_DIR
   DOC_REPO_URL
   DOXY_TYPE
@@ -123,20 +125,20 @@ if ! scons; then
 fi
 
 # Now setup for build of Data Release library documentation
-DATAREL_VERSION=$(eups list -t "$DOXY_TYPE" datarel | awk '{print $1}')
-if [[ -z $DATAREL_VERSION ]]; then
-  fail "*** Failed to find datarel \"$DOXY_TYPE\" version."
+DOC_PKG_VERSION=$(eups list -t "$DOXY_TYPE" "$DOC_PKG" | awk '{print $1}')
+if [[ -z $DOC_PKG_VERSION ]]; then
+  fail "*** Failed to find \"${DOC_PKG}\" \"${DOXY_TYPE}\" version."
 fi
-echo "DATAREL_VERSION: $DATAREL_VERSION"
+echo "${DOC_PKG} VERSION: ${DOC_PKG_VERSION}"
 
 # XXX can not run setup in a subshell for error handling
-setup datarel "$DATAREL_VERSION"
+setup "$DOC_PKG" "$DOC_PKG_VERSION"
 eups list -s
 
 if ! "${DOC_REPO_DIR}/bin/makeDocs" \
   --nodot \
   --htmlDir "$HTML_DIR" \
-  datarel "$DATAREL_VERSION" > MakeDocs.out; then
+  "$DOC_PKG" "$DOC_PKG_VERSION" > MakeDocs.out; then
   fail "*** Failed to generate complete makeDocs output for \"$DOXY_TYPE\" source."
 fi
 
