@@ -180,32 +180,40 @@ if [[ ! -d $DEMO_DIR ]]; then
   fail "*** Failed to find unpacked directory: ${DEMO_DIR}"
 fi
 
-cd "$DEMO_DIR"
-
 # Setup either requested tag or last successfully built lsst_apps
 if [[ -n $TAG ]]; then
   setup -t "$TAG" lsst_apps
 else
   setup -j lsst_apps
-  cd "${LSST_APPS_DIR}/../"
-  VERSION=$(find . | sort -r -n -t+ +1 -2 | head -1)
+  # only change pwd in a subshell
+  VERSION="$(set -e
+    cd "${LSST_APPS_DIR}/../"
+    find . | sort -r -n -t+ +1 -2 | head -1
+  )"
   setup lsst_apps "$VERSION"
 fi
-
-#*************************************************************************
-cat <<-EOF
-----------------------------------------------------------------
-EUPS-tag: ${TAG}     Version: ${VERSION}
-Dataset size: ${SIZE}
-Current $(umask -p)
-Setup lsst_apps
-$(eups list  -s)
------------------------------------------------------------------
-EOF
 
 if [[ -z $PIPE_TASKS_DIR || -z $OBS_SDSS_DIR ]]; then
   fail "*** Failed to setup either PIPE_TASKS or OBS_SDSS; both of which are required by ${DEMO_DIR}"
 fi
+
+cd "$DEMO_DIR"
+
+cat <<-EOF
+----------------------------------------------------------------
+EUPS-tag: ${TAG}
+Version: ${VERSION}
+Dataset size: ${SIZE}
+Current $(umask -p)
+[DEMO]REF: ${REF}
+DEMO_TGZ: ${DEMO_TGZ}
+DEMO_URL: ${DEMO_URL}
+DEMO_DIR: ${DEMO_DIR}
+PWD: ${PWD}
+Setup lsst_apps
+$(eups list  -s)
+-----------------------------------------------------------------
+EOF
 
 if ! ./bin/demo.sh --$SIZE; then
   fail "*** Failed during execution of ${DEMO_DIR}"
