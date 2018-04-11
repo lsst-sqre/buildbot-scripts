@@ -7,6 +7,9 @@ set -e
 DEMO_BASE_URL=${DEMO_BASE_URL:-https://github.com/lsst/lsst_dm_stack_demo/archive}
 # lsst_dm_stack_demo-master.tar.gz
 DEMO_BASE_DIR=${DEMO_BASE_DIR:-lsst_dm_stack_demo}
+# relative to the root of the demo archive
+DEMO_RUN_SCRIPT='./bin/demo.sh'
+DEMO_CMP_SCRIPT='./bin/compare'
 
 print_error() {
   >&2 echo -e "$@"
@@ -99,6 +102,14 @@ find_archive_ref() {
   done
 
   echo "$ref"
+}
+
+check_script() {
+  local script=${1?command is required}
+
+  [[ ! -e $script ]] && fail "*** script ${script} is missing"
+  [[ ! -f $script ]] && fail "*** script ${script} is not a file"
+  [[ ! -x $script ]] && fail "*** script ${script} is not executable"
 }
 
 #--------------------------------------------------------------------------
@@ -214,6 +225,9 @@ fi
 
 cd "$DEMO_DIR"
 
+check_script "$DEMO_RUN_SCRIPT"
+check_script "$DEMO_CMP_SCRIPT"
+
 cat <<-EOF
 ----------------------------------------------------------------
 EUPS-tag: ${TAG}
@@ -230,7 +244,7 @@ $(eups list  -s)
 -----------------------------------------------------------------
 EOF
 
-if ! ./bin/demo.sh --$SIZE; then
+if ! "$DEMO_RUN_SCRIPT" --$SIZE; then
   fail "*** Failed during execution of ${DEMO_DIR}"
 fi
 
@@ -241,10 +255,10 @@ NEWCOLUMNS=$(for i in $COLUMNS; do echo -n "$j:$i "; j=$((j+1)); done)
 cat <<-EOF
 Columns in benchmark datafile:
 ${NEWCOLUMNS}
-./bin/compare detected-sources${SIZE_EXT}.txt
+${DEMO_CMP_SCRIPT} detected-sources${SIZE_EXT}.txt
 EOF
 
-if ! ./bin/compare detected-sources${SIZE_EXT}.txt; then
+if ! "$DEMO_CMP_SCRIPT" detected-sources${SIZE_EXT}.txt; then
   fail "*** Warning: output results not within error tolerance for: ${DEMO_DIR}"
 fi
 
