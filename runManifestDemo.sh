@@ -19,9 +19,14 @@ fail() {
   exit $code
 }
 
+has_cmd() {
+  local command=${1?command is required}
+  command -v "$command" > /dev/null 2>&1
+}
+
 setup() {
   # eval masks all errors
-  if ! type -p eups_setup; then
+  if ! has_cmd eups_setup; then
     fail "unable to find eups_setup"
   fi
   eval "$(eups_setup DYLD_LIBRARY_PATH="${DYLD_LIBRARY_PATH}" "$@")"
