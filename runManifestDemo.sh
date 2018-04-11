@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 # Run the demo code to test DM algorithms
 
 set -e
@@ -7,6 +7,9 @@ set -e
 DEMO_BASE_URL=${DEMO_BASE_URL:-https://github.com/lsst/lsst_dm_stack_demo/archive}
 # lsst_dm_stack_demo-master.tar.gz
 DEMO_BASE_DIR=${DEMO_BASE_DIR:-lsst_dm_stack_demo}
+# relative to the root of the demo archive
+DEMO_RUN_SCRIPT='./bin/demo.sh'
+DEMO_CMP_SCRIPT='./bin/compare'
 
 print_error() {
   >&2 echo -e "$@"
@@ -19,9 +22,14 @@ fail() {
   exit $code
 }
 
+has_cmd() {
+  local command=${1?command is required}
+  run command -v "$command" > /dev/null 2>&1
+}
+
 setup() {
   # eval masks all errors
-  if ! type -p eups_setup; then
+  if ! has_cmd eups_setup; then
     fail "unable to find eups_setup"
   fi
   eval "$(eups_setup DYLD_LIBRARY_PATH="${DYLD_LIBRARY_PATH}" "$@")"
@@ -62,7 +70,7 @@ check_archive_ref() {
 
   local url
   url=$(mk_archive_url "$ref")
-  if curl -Ls --fail --head -o /dev/null "$url"; then
+  if run curl -Ls --fail --head -o /dev/null "$url"; then
     return 0
   fi
 
@@ -76,7 +84,6 @@ find_archive_ref() {
   local -a candidate_refs
 
   if [[ -n $tag ]]; then
-    # shellcheck disable=SC2207
     candidate_refs=(
       "$tag"
       $(deeupsify_tag "$tag")
@@ -94,6 +101,26 @@ find_archive_ref() {
   done
 
   echo "$ref"
+}
+
+check_script() {
+  local script=${1?command is required}
+
+  [[ ! -e $script ]] && fail "*** script ${script} is missing"
+  [[ ! -f $script ]] && fail "*** script ${script} is not a file"
+  [[ ! -x $script ]] && fail "*** script ${script} is not executable"
+
+  return 0
+}
+
+run() {
+  if [[ $DRYRUN == true ]]; then
+    echo "$@"
+  elif [[ $DEBUG == true ]]; then
+    (set -x; "$@")
+  else
+    "$@"
+  fi
 }
 
 #--------------------------------------------------------------------------
@@ -128,31 +155,36 @@ TAG=""
 SIZE=""
 SIZE_EXT=""
 
-# shellcheck disable=SC2034
-options=$(getopt -l help,small,tag: -- "$@")
-while true; do
-  case $1 in
-    --help)
+if [[ -n "$*" ]]; then
+  getopt -l help,small,debug,tag: -- "$@" > /dev/null 2>&1
+  while true; do
+    case $1 in
+      --help)
         usage
         ;;
-    --small)
+      --small)
         SIZE="small";
         SIZE_EXT="_small";
         shift 1
         ;;
-    --tag)
+      --tag)
         TAG=$2;
         shift 2
         ;;
-    --)
+      --debug)
+        DEBUG=true;
+        shift 1
+        ;;
+      --)
         break
         ;;
-    *)
+      *)
         [[ "$*" != "" ]] && usage
         break
         ;;
-  esac
-done
+    esac
+  done
+fi
 
 REF=$(find_archive_ref "$TAG")
 DEMO_TGZ=$(mk_archive_filename "$REF")
@@ -166,13 +198,22 @@ if [[ ! -t 1 ]]; then
   CURL_OPTS='-sS'
 fi
 
-curl "$CURL_OPTS" -L -o "$DEMO_TGZ" "$DEMO_URL"
+run curl "$CURL_OPTS" -L -o "$DEMO_TGZ" "$DEMO_URL"
 if [[ ! -f $DEMO_TGZ ]]; then
   fail "*** Failed to acquire demo from: ${DEMO_URL}."
 fi
 
-echo "tar xzf ${DEMO_TGZ}"
-if ! tar xzf "$DEMO_TGZ"; then
+if [[ -e $DEMO_DIR ]]; then
+  {
+		cat <<-EOF
+		The demo archive destination path ${DEMO_DIR} already exists; attempting to
+		remove it.
+		EOF
+  } | fmt -uw 78
+  run rm -rf "$DEMO_DIR"
+fi
+
+if ! run tar xzf "$DEMO_TGZ"; then
   fail "*** Failed to unpack: ${DEMO_TGZ}"
 fi
 
@@ -199,6 +240,9 @@ fi
 
 cd "$DEMO_DIR"
 
+check_script "$DEMO_RUN_SCRIPT"
+check_script "$DEMO_CMP_SCRIPT"
+
 cat <<-EOF
 ----------------------------------------------------------------
 EUPS-tag: ${TAG}
@@ -215,22 +259,21 @@ $(eups list  -s)
 -----------------------------------------------------------------
 EOF
 
-if ! ./bin/demo.sh --$SIZE; then
+if ! run "$DEMO_RUN_SCRIPT" --$SIZE; then
   fail "*** Failed during execution of ${DEMO_DIR}"
 fi
 
 # Add column position to each label for ease of reading the output comparison
-COLUMNS=$(head -1 detected-sources$SIZE_EXT.txt| sed -e "s/^#//")
+COLUMNS=$(run head -1 detected-sources$SIZE_EXT.txt| sed -e "s/^#//")
 j=1
 NEWCOLUMNS=$(for i in $COLUMNS; do echo -n "$j:$i "; j=$((j+1)); done)
 cat <<-EOF
 Columns in benchmark datafile:
 ${NEWCOLUMNS}
-./bin/compare detected-sources${SIZE_EXT}.txt
 EOF
 
-if ! ./bin/compare detected-sources${SIZE_EXT}.txt; then
-  fail "*** Warning: output results not within error tolerance for: ${DEMO_DIR}"
+if ! run "$DEMO_CMP_SCRIPT" detected-sources${SIZE_EXT}.txt; then
+  fail "*** Warning: output results not within error tolerance"
 fi
 
 # vim: tabstop=2 shiftwidth=2 expandtab

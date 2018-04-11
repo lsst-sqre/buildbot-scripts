@@ -218,7 +218,7 @@ if [[ $RUN_DEMO == true ]]; then
   cd "$LSSTSW_BUILD_DIR"
 
   print_info "Start Demo run at: $(date)"
-  if ! "${SCRIPT_DIR}/runManifestDemo.sh" --tag "$TAG" --small; then
+  if ! "${SCRIPT_DIR}/runManifestDemo.sh" --tag "$TAG" --small --debug; then
     fail "*** There was an error running the simple integration demo."
   fi
   print_success "The simple integration demo was successfully run."
