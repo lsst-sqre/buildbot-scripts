@@ -176,6 +176,16 @@ if [[ ! -f $DEMO_TGZ ]]; then
   fail "*** Failed to acquire demo from: ${DEMO_URL}."
 fi
 
+if [[ -e $DEMO_DIR ]]; then
+  {
+		cat <<-EOF
+		The demo archive destination path ${DEMO_DIR} already exists; attempting to
+		remove it.
+		EOF
+  } | fmt -uw 78
+  rm -rf "$DEMO_DIR"
+fi
+
 echo "tar xzf ${DEMO_TGZ}"
 if ! tar xzf "$DEMO_TGZ"; then
   fail "*** Failed to unpack: ${DEMO_TGZ}"
