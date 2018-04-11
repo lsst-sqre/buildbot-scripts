@@ -187,8 +187,11 @@ if [[ -n $TAG ]]; then
   setup -t "$TAG" lsst_apps
 else
   setup -j lsst_apps
-  cd "${LSST_APPS_DIR}/../"
-  VERSION=$(find . | sort -r -n -t+ +1 -2 | head -1)
+  # only change pwd in a subshell
+  VERSION="$(set -e
+    cd "${LSST_APPS_DIR}/../"
+    find . | sort -r -n -t+ +1 -2 | head -1
+  )"
   setup lsst_apps "$VERSION"
 fi
 
