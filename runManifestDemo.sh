@@ -156,35 +156,36 @@ TAG=""
 SIZE=""
 SIZE_EXT=""
 
-# shellcheck disable=SC2034
-options=$(getopt -l help,small,debug,tag: -- "$@")
-while true; do
-  case $1 in
-    --help)
+if [[ -n "$*" ]]; then
+  getopt -l help,small,debug,tag: -- "$@" > /dev/null 2>&1
+  while true; do
+    case $1 in
+      --help)
         usage
         ;;
-    --small)
+      --small)
         SIZE="small";
         SIZE_EXT="_small";
         shift 1
         ;;
-    --debug)
-        DEBUG=true;
-        shift 1
-        ;;
-    --tag)
+      --tag)
         TAG=$2;
         shift 2
         ;;
-    --)
+      --debug)
+        DEBUG=true;
+        shift 1
+        ;;
+      --)
         break
         ;;
-    *)
+      *)
         [[ "$*" != "" ]] && usage
         break
         ;;
-  esac
-done
+    esac
+  done
+fi
 
 REF=$(find_archive_ref "$TAG")
 DEMO_TGZ=$(mk_archive_filename "$REF")
