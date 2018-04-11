@@ -259,7 +259,7 @@ ${DEMO_CMP_SCRIPT} detected-sources${SIZE_EXT}.txt
 EOF
 
 if ! "$DEMO_CMP_SCRIPT" detected-sources${SIZE_EXT}.txt; then
-  fail "*** Warning: output results not within error tolerance for: ${DEMO_DIR}"
+  fail "*** Warning: output results not within error tolerance"
 fi
 
 # vim: tabstop=2 shiftwidth=2 expandtab
