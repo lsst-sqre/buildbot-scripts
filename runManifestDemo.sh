@@ -24,7 +24,7 @@ fail() {
 
 has_cmd() {
   local command=${1?command is required}
-  command -v "$command" > /dev/null 2>&1
+  run command -v "$command" > /dev/null 2>&1
 }
 
 setup() {
@@ -70,7 +70,7 @@ check_archive_ref() {
 
   local url
   url=$(mk_archive_url "$ref")
-  if curl -Ls --fail --head -o /dev/null "$url"; then
+  if run curl -Ls --fail --head -o /dev/null "$url"; then
     return 0
   fi
 
@@ -110,6 +110,18 @@ check_script() {
   [[ ! -e $script ]] && fail "*** script ${script} is missing"
   [[ ! -f $script ]] && fail "*** script ${script} is not a file"
   [[ ! -x $script ]] && fail "*** script ${script} is not executable"
+
+  return 0
+}
+
+run() {
+  if [[ $DRYRUN == true ]]; then
+    echo "$@"
+  elif [[ $DEBUG == true ]]; then
+    (set -x; "$@")
+  else
+    "$@"
+  fi
 }
 
 #--------------------------------------------------------------------------
@@ -145,7 +157,7 @@ SIZE=""
 SIZE_EXT=""
 
 # shellcheck disable=SC2034
-options=$(getopt -l help,small,tag: -- "$@")
+options=$(getopt -l help,small,debug,tag: -- "$@")
 while true; do
   case $1 in
     --help)
@@ -154,6 +166,10 @@ while true; do
     --small)
         SIZE="small";
         SIZE_EXT="_small";
+        shift 1
+        ;;
+    --debug)
+        DEBUG=true;
         shift 1
         ;;
     --tag)
@@ -182,7 +198,7 @@ if [[ ! -t 1 ]]; then
   CURL_OPTS='-sS'
 fi
 
-curl "$CURL_OPTS" -L -o "$DEMO_TGZ" "$DEMO_URL"
+run curl "$CURL_OPTS" -L -o "$DEMO_TGZ" "$DEMO_URL"
 if [[ ! -f $DEMO_TGZ ]]; then
   fail "*** Failed to acquire demo from: ${DEMO_URL}."
 fi
@@ -194,11 +210,10 @@ if [[ -e $DEMO_DIR ]]; then
 		remove it.
 		EOF
   } | fmt -uw 78
-  rm -rf "$DEMO_DIR"
+  run rm -rf "$DEMO_DIR"
 fi
 
-echo "tar xzf ${DEMO_TGZ}"
-if ! tar xzf "$DEMO_TGZ"; then
+if ! run tar xzf "$DEMO_TGZ"; then
   fail "*** Failed to unpack: ${DEMO_TGZ}"
 fi
 
@@ -244,21 +259,20 @@ $(eups list  -s)
 -----------------------------------------------------------------
 EOF
 
-if ! "$DEMO_RUN_SCRIPT" --$SIZE; then
+if ! run "$DEMO_RUN_SCRIPT" --$SIZE; then
   fail "*** Failed during execution of ${DEMO_DIR}"
 fi
 
 # Add column position to each label for ease of reading the output comparison
-COLUMNS=$(head -1 detected-sources$SIZE_EXT.txt| sed -e "s/^#//")
+COLUMNS=$(run head -1 detected-sources$SIZE_EXT.txt| sed -e "s/^#//")
 j=1
 NEWCOLUMNS=$(for i in $COLUMNS; do echo -n "$j:$i "; j=$((j+1)); done)
 cat <<-EOF
 Columns in benchmark datafile:
 ${NEWCOLUMNS}
-${DEMO_CMP_SCRIPT} detected-sources${SIZE_EXT}.txt
 EOF
 
-if ! "$DEMO_CMP_SCRIPT" detected-sources${SIZE_EXT}.txt; then
+if ! run "$DEMO_CMP_SCRIPT" detected-sources${SIZE_EXT}.txt; then
   fail "*** Warning: output results not within error tolerance"
 fi
 
