@@ -84,7 +84,6 @@ find_archive_ref() {
   local -a candidate_refs
 
   if [[ -n $tag ]]; then
-    # shellcheck disable=SC2207
     candidate_refs=(
       "$tag"
       $(deeupsify_tag "$tag")
