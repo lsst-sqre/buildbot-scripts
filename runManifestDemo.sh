@@ -201,9 +201,15 @@ cd "$DEMO_DIR"
 
 cat <<-EOF
 ----------------------------------------------------------------
-EUPS-tag: ${TAG}     Version: ${VERSION}
+EUPS-tag: ${TAG}
+Version: ${VERSION}
 Dataset size: ${SIZE}
 Current $(umask -p)
+[DEMO]REF: ${REF}
+DEMO_TGZ: ${DEMO_TGZ}
+DEMO_URL: ${DEMO_URL}
+DEMO_DIR: ${DEMO_DIR}
+PWD: ${PWD}
 Setup lsst_apps
 $(eups list  -s)
 -----------------------------------------------------------------
