@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 # Run the demo code to test DM algorithms
 
 set -e
