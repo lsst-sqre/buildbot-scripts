@@ -36,6 +36,27 @@ cc::check_scl_collection() {
   scl --list | grep --quiet "$collection"
 }
 
+# source "quietly", ignoring -o verbose
+cc::scl_source() {
+  local scl=${1?scl is required}
+
+  # force verbose for enable script so we know something happened
+  local shopts
+  shopts=$(set +o)
+  set -o verbose
+
+  # XXX scl_source seems to be broken on el6 as `/usr/bin/scl_enabled
+  # devtoolset-3` is always exiting 1. Directly sourcing the enable script
+  # seem to work across el6/7.
+  # source scl_source enable "$compiler"
+  # shellcheck disable=SC1090
+  source "/opt/rh/${scl}/enable"
+
+  # suppress verbose for eval
+  set +o verbose
+  eval "$shopts"
+}
+
 # Ensure that the desired cc will be in use either by managling the env to
 # configure that compiler as the "default" or by verifying that it is already
 # the default CC
@@ -47,22 +68,16 @@ cc::setup() {
   case $compiler in
     devtoolset-*):
       cc::check_scl_collection "$compiler"
+      cc::scl_source "$compiler"
+      ;;
+    llvm-toolset-*):
+      cc::check_scl_collection "$compiler"
+      cc::scl_source "$compiler"
 
-      # force verbose for enable script so we know something happened
-      local shopts
-      shopts=$(set +o)
-      set -o verbose
-
-      # XXX scl_source seems to be broken on el6 as `/usr/bin/scl_enabled
-      # devtoolset-3` is always exiting 1. Directly sourcing the enable script
-      # seem to work across el6/7.
-      # source scl_source enable "$compiler"
-      # shellcheck disable=SC1090
-      source "/opt/rh/${compiler}/enable"
-
-      # suppress verbose for eval
-      set +o verbose
-      eval "$shopts"
+      # eupspkg.sh passes $CC to scons as cc=$CC -- this needs to be "clang"
+      # without a path prefix.  sconsUtils ignores these env vars.
+      export CC=clang
+      export CXX=clang++
       ;;
     gcc-system)
       set +e
