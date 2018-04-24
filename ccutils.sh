@@ -78,6 +78,10 @@ cc::setup() {
       # without a path prefix.  sconsUtils ignores these env vars.
       export CC=clang
       export CXX=clang++
+      # needed to force distutils to *not* use the same compiler as python was
+      # built with
+      # see: https://bugs.python.org/issue24935
+      export LDSHARED="${CC} -shared"
       ;;
     gcc-system)
       set +e
