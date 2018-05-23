@@ -209,7 +209,7 @@ if [[ -e $DEMO_DIR ]]; then
 		The demo archive destination path ${DEMO_DIR} already exists; attempting to
 		remove it.
 		EOF
-  } | fmt -uw 78
+  } | fmt -w 78
   run rm -rf "$DEMO_DIR"
 fi
 
