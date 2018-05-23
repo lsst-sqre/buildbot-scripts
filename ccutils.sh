@@ -36,14 +36,14 @@ cc::check_scl_collection() {
   scl --list | grep --quiet "$collection"
 }
 
-# source "quietly", ignoring -o verbose
+# source "quietly", ignoring -o xtrace
 cc::scl_source() {
   local scl=${1?scl is required}
 
-  # force verbose for enable script so we know something happened
+  # force xtrace for enable script so we know something happened
   local shopts
   shopts=$(set +o)
-  set -o verbose
+  set -o xtrace
 
   # XXX scl_source seems to be broken on el6 as `/usr/bin/scl_enabled
   # devtoolset-3` is always exiting 1. Directly sourcing the enable script
@@ -52,8 +52,8 @@ cc::scl_source() {
   # shellcheck disable=SC1090
   source "/opt/rh/${scl}/enable"
 
-  # suppress verbose for eval
-  set +o verbose
+  # suppress xtrace for eval
+  set +o xtrace
   eval "$shopts"
 }
 
