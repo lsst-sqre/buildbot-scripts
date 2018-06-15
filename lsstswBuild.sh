@@ -220,7 +220,7 @@ if [[ $RUN_DEMO == true ]]; then
 
   print_info "Start Demo run at: $(date)"
   if ! "${SCRIPT_DIR}/runManifestDemo.sh" \
-      --tag "$MANIFEST_ID" \
+      --eups-tag "$MANIFEST_ID" \
       --small \
       --debug; then
     fail "*** There was an error running the simple integration demo."
