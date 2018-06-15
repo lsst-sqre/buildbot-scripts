@@ -178,9 +178,10 @@ fi
 MANIFEST=${LSSTSW_BUILD_DIR}/manifest.txt
 
 # Set current build tag (also used as eups tag per installed package).
-eval "$(grep -E '^BUILD=' "$MANIFEST" | sed -e 's/BUILD/TAG/')"
+eval "$(grep -E '^BUILD=' "$MANIFEST" | sed -e 's/BUILD/MANIFEST_ID/')"
 
-print_success "The DM stack has been installed at $LSSTSW with tag: $TAG."
+print_success "The DM stack has been installed at: ${LSSTSW}"
+print_success "    with tag: ${MANIFEST_ID}."
 
 end_section # build
 
@@ -218,7 +219,10 @@ if [[ $RUN_DEMO == true ]]; then
   cd "$LSSTSW_BUILD_DIR"
 
   print_info "Start Demo run at: $(date)"
-  if ! "${SCRIPT_DIR}/runManifestDemo.sh" --tag "$TAG" --small --debug; then
+  if ! "${SCRIPT_DIR}/runManifestDemo.sh" \
+      --tag "$MANIFEST_ID" \
+      --small \
+      --debug; then
     fail "*** There was an error running the simple integration demo."
   fi
   print_success "The simple integration demo was successfully run."
