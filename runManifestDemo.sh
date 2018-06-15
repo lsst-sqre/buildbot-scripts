@@ -222,7 +222,13 @@ if [[ -e $DEMO_DIR ]]; then
   run rm -rf "$DEMO_DIR"
 fi
 
-if ! run tar xzf "$DEMO_TGZ"; then
+if ! run mkdir -p "$DEMO_DIR"; then
+  fail "*** unable to create dir: ${DEMO_DIR}"
+fi
+
+# XXX due to a bug with github, a 'v' prefix on a tag is stripped from the
+# tarball subdir so we need to strip it off.
+if ! run tar xzf "$DEMO_TGZ" --strip 1 -C "$DEMO_DIR"; then
   fail "*** Failed to unpack: ${DEMO_TGZ}"
 fi
 
