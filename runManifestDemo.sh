@@ -142,6 +142,8 @@ usage() {
 		              build.
 		 --small : to use small dataset; otherwise a mini-production size will
 		           be used.
+		 --git-ref <ref> : git ref to check for version of the demo to download.
+		                   May be specified multiple times.
 
 		EOF
   )"
@@ -149,11 +151,12 @@ usage() {
 
 
 EUPS_TAG=""
+GIT_REFS=()
 SIZE=""
 SIZE_EXT=""
 
 if [[ -n "$*" ]]; then
-  getopt -l help,small,debug,eups-tag: -- "$@" > /dev/null 2>&1
+  getopt -l help,small,debug,eups-tag:,git-ref: -- "$@" > /dev/null 2>&1
   while true; do
     case $1 in
       --help)
@@ -166,6 +169,10 @@ if [[ -n "$*" ]]; then
         ;;
       --eups-tag)
         EUPS_TAG=$2
+        shift 2
+        ;;
+      --git-ref)
+        GIT_REFS+=("$2")
         shift 2
         ;;
       --debug)
@@ -183,7 +190,12 @@ if [[ -n "$*" ]]; then
   done
 fi
 
-REF=$(find_archive_ref "$EUPS_TAG" "$(deeupsify_tag "$EUPS_TAG")")
+REF=$(
+  find_archive_ref \
+    "${GIT_REFS[@]}" \
+    "$EUPS_TAG" \
+    "$(deeupsify_tag "$EUPS_TAG")"
+)
 DEMO_TGZ=$(mk_archive_filename "$REF")
 DEMO_URL=$(mk_archive_url "$REF")
 DEMO_DIR=$(mk_archive_dirname "$REF")
