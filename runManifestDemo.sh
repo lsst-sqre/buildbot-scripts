@@ -163,16 +163,16 @@ if [[ -n "$*" ]]; then
         usage
         ;;
       --small)
-        SIZE="small";
-        SIZE_EXT="_small";
+        SIZE="small"
+        SIZE_EXT="_small"
         shift 1
         ;;
       --tag)
-        TAG=$2;
+        TAG=$2
         shift 2
         ;;
       --debug)
-        DEBUG=true;
+        DEBUG=true
         shift 1
         ;;
       --)
