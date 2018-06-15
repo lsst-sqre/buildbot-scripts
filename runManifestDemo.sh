@@ -78,16 +78,13 @@ check_archive_ref() {
 }
 
 find_archive_ref() {
-  local tag=$1
+  local tags=("$@")
 
   local ref
   local -a candidate_refs
 
-  if [[ -n $tag ]]; then
-    candidate_refs=(
-      "$tag"
-      "$(deeupsify_tag "$tag")"
-    )
+  if [[ ${#tags[@]} -ne 0 ]]; then
+    candidate_refs+=( "${tags[@]}" )
   fi
 
   candidate_refs+=( master )
@@ -186,7 +183,7 @@ if [[ -n "$*" ]]; then
   done
 fi
 
-REF=$(find_archive_ref "$EUPS_TAG")
+REF=$(find_archive_ref "$EUPS_TAG" "$(deeupsify_tag "$EUPS_TAG")")
 DEMO_TGZ=$(mk_archive_filename "$REF")
 DEMO_URL=$(mk_archive_url "$REF")
 DEMO_DIR=$(mk_archive_dirname "$REF")
