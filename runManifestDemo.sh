@@ -92,12 +92,13 @@ find_archive_ref() {
   for r in ${candidate_refs[*]}; do
     [[ -z $r ]] && continue
     if check_archive_ref "$r"; then
-      ref=$r
-      break
+      echo "$r"
+      return 0
+      break # dead
     fi
   done
 
-  echo "$ref"
+  fail 'unable to find an archive'
 }
 
 check_script() {
@@ -193,7 +194,6 @@ fi
 REF=$(
   find_archive_ref \
     "${GIT_REFS[@]}" \
-    "$EUPS_TAG" \
     "$(deeupsify_tag "$EUPS_TAG")"
 )
 DEMO_TGZ=$(mk_archive_filename "$REF")
