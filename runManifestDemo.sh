@@ -86,7 +86,7 @@ find_archive_ref() {
   if [[ -n $tag ]]; then
     candidate_refs=(
       "$tag"
-      $(deeupsify_tag "$tag")
+      "$(deeupsify_tag "$tag")"
     )
   fi
 
