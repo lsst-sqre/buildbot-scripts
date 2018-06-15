@@ -168,7 +168,6 @@ if [[ ! -z $PRODUCT ]]; then
   # shellcheck disable=SC2206
   ARGS+=($PRODUCT)
 fi
-set -e
 
 if ! "${LSSTSW}/bin/rebuild" "${ARGS[@]}"; then
   fail 'Failed during rebuild of DM stack.'
