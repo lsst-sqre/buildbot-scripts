@@ -79,6 +79,7 @@ end_section() {
   echo
 }
 
+# XXX note that BRANCH is actually git refs
 # XXX REF_LIST and PRODUCT would be better handled as arrays
 # shellcheck disable=SC2054 disable=SC2034
 options=(getopt --long branch:,product:,skip_docs,skip_demo,no-fetch,print-fail,color -- "$@")
@@ -217,11 +218,16 @@ if [[ $RUN_DEMO == true ]]; then
   # unpack a tarball
   cd "$LSSTSW_BUILD_DIR"
 
+  ARGS=()
+  ARGS+=(--eups-tag "$MANIFEST_ID")
+  ARGS+=(--small)
+  ARGS+=(--debug)
+  for ref in $BRANCH; do
+    ARGS+=(--git-ref "$ref")
+  done
+
   print_info "Start Demo run at: $(date)"
-  if ! "${SCRIPT_DIR}/runManifestDemo.sh" \
-      --eups-tag "$MANIFEST_ID" \
-      --small \
-      --debug; then
+  if ! "${SCRIPT_DIR}/runManifestDemo.sh" "${ARGS[@]}"; then
     fail "*** There was an error running the simple integration demo."
   fi
   print_success "The simple integration demo was successfully run."
