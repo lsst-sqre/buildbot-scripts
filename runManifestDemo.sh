@@ -78,16 +78,13 @@ check_archive_ref() {
 }
 
 find_archive_ref() {
-  local tag=$1
+  local tags=("$@")
 
   local ref
   local -a candidate_refs
 
-  if [[ -n $tag ]]; then
-    candidate_refs=(
-      "$tag"
-      $(deeupsify_tag "$tag")
-    )
+  if [[ ${#tags[@]} -ne 0 ]]; then
+    candidate_refs+=( "${tags[@]}" )
   fi
 
   candidate_refs+=( master )
@@ -95,12 +92,13 @@ find_archive_ref() {
   for r in ${candidate_refs[*]}; do
     [[ -z $r ]] && continue
     if check_archive_ref "$r"; then
-      ref=$r
-      break
+      echo "$r"
+      return 0
+      break # dead
     fi
   done
 
-  echo "$ref"
+  fail 'unable to find an archive'
 }
 
 check_script() {
@@ -141,38 +139,45 @@ usage() {
 		Initiate demonstration run.
 
 		Options:
-		 --tag <id> : eups-tag for eups-setup or defaults to latest master
+		 --eups-tag <id> : eups-tag for eups-setup or defaults to latest master
 		              build.
 		 --small : to use small dataset; otherwise a mini-production size will
 		           be used.
+		 --git-ref <ref> : git ref to check for version of the demo to download.
+		                   May be specified multiple times.
 
 		EOF
   )"
 }
 
 
-TAG=""
+EUPS_TAG=""
+GIT_REFS=()
 SIZE=""
 SIZE_EXT=""
 
 if [[ -n "$*" ]]; then
-  getopt -l help,small,debug,tag: -- "$@" > /dev/null 2>&1
+  getopt -l help,small,debug,eups-tag:,git-ref: -- "$@" > /dev/null 2>&1
   while true; do
     case $1 in
       --help)
         usage
         ;;
       --small)
-        SIZE="small";
-        SIZE_EXT="_small";
+        SIZE="small"
+        SIZE_EXT="_small"
         shift 1
         ;;
-      --tag)
-        TAG=$2;
+      --eups-tag)
+        EUPS_TAG=$2
+        shift 2
+        ;;
+      --git-ref)
+        GIT_REFS+=("$2")
         shift 2
         ;;
       --debug)
-        DEBUG=true;
+        DEBUG=true
         shift 1
         ;;
       --)
@@ -186,7 +191,11 @@ if [[ -n "$*" ]]; then
   done
 fi
 
-REF=$(find_archive_ref "$TAG")
+REF=$(
+  find_archive_ref \
+    "${GIT_REFS[@]}" \
+    "$(deeupsify_tag "$EUPS_TAG")"
+)
 DEMO_TGZ=$(mk_archive_filename "$REF")
 DEMO_URL=$(mk_archive_url "$REF")
 DEMO_DIR=$(mk_archive_dirname "$REF")
@@ -213,7 +222,13 @@ if [[ -e $DEMO_DIR ]]; then
   run rm -rf "$DEMO_DIR"
 fi
 
-if ! run tar xzf "$DEMO_TGZ"; then
+if ! run mkdir -p "$DEMO_DIR"; then
+  fail "*** unable to create dir: ${DEMO_DIR}"
+fi
+
+# XXX due to a bug with github, a 'v' prefix on a tag is stripped from the
+# tarball subdir so we need to strip it off.
+if ! run tar xzf "$DEMO_TGZ" --strip 1 -C "$DEMO_DIR"; then
   fail "*** Failed to unpack: ${DEMO_TGZ}"
 fi
 
@@ -222,8 +237,8 @@ if [[ ! -d $DEMO_DIR ]]; then
 fi
 
 # Setup either requested tag or last successfully built lsst_apps
-if [[ -n $TAG ]]; then
-  setup -t "$TAG" lsst_apps
+if [[ -n $EUPS_TAG ]]; then
+  setup -t "$EUPS_TAG" lsst_apps
 else
   setup -j lsst_apps
   # only change pwd in a subshell
@@ -245,7 +260,7 @@ check_script "$DEMO_CMP_SCRIPT"
 
 cat <<-EOF
 ----------------------------------------------------------------
-EUPS-tag: ${TAG}
+EUPS-tag: ${EUPS_TAG}
 Version: ${VERSION}
 Dataset size: ${SIZE}
 Current $(umask -p)
