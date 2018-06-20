@@ -156,7 +156,7 @@ if ! ( set -e
 fi
 
 if ! ( set -e
-  cp -ar "$HTML_DIR" "$DOC_INSTALL_DIR"
+  cp -a "$HTML_DIR" "$DOC_INSTALL_DIR"
   chmod o+rx "$DOC_INSTALL_DIR"
 ); then
   fail "*** Failed to copy doxygen documentation to ${DOC_INSTALL_DIR}"
