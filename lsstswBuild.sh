@@ -82,7 +82,7 @@ end_section() {
 # XXX note that BRANCH is actually git refs
 # XXX REF_LIST and PRODUCT would be better handled as arrays
 # shellcheck disable=SC2054 disable=SC2034
-options=(getopt --long branch:,product:,skip_docs,skip_demo,no-fetch,print-fail,color -- "$@")
+options=(getopt --long branch:,product:,skip_docs,skip_demo,no-fetch,print-fail,color,prepare-only -- "$@")
 while true
 do
   case "$1" in
@@ -92,6 +92,7 @@ do
     --skip_demo)    RUN_DEMO=false    ; shift 1 ;;
     --no-fetch)     NO_FETCH=true     ; shift 1 ;;
     --color)        COLORIZE=true     ; shift 1 ;;
+    --prepare-only) PREP_ONLY=true    ; shift 1 ;;
     --) shift; break;;
     *) [[ "$*" != "" ]] && fail "Unknown option: $1"
        break;;
@@ -158,6 +159,9 @@ print_info "Rebuild is commencing....stand by; using $REF_LIST"
 ARGS=()
 if [[ $NO_FETCH == true ]]; then
   ARGS+=("-n")
+fi
+if [[ $PREP_ONLY == true ]]; then
+  ARGS+=("-p")
 fi
 if [[ ! -z $REF_LIST ]]; then
   # XXX intentionally not quoted to allow word splitting
