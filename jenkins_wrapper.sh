@@ -21,6 +21,7 @@ source "${SCRIPT_DIR}/ccutils.sh"
 # * LSST_PYTHON_VERSION
 # * SKIP_DEMO
 # * SKIP_DOCS
+# * PREP_ONLY
 #
 
 ARGS=()
@@ -56,6 +57,9 @@ fi
 
 if [[ $NO_FETCH == true ]]; then
   ARGS+=('--no-fetch')
+fi
+if [[ $PREP_ONLY == true ]]; then
+  ARGS+=('--prepare-only')
 fi
 
 # require that $LSST_COMPILER is defined
