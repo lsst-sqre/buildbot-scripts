@@ -40,21 +40,12 @@ cc::check_scl_collection() {
 cc::scl_source() {
   local scl=${1?scl is required}
 
-  # force xtrace for enable script so we know something happened
-  local shopts
-  shopts=$(set +o)
-  set -o xtrace
-
   # XXX scl_source seems to be broken on el6 as `/usr/bin/scl_enabled
   # devtoolset-3` is always exiting 1. Directly sourcing the enable script
   # seem to work across el6/7.
   # source scl_source enable "$compiler"
   # shellcheck disable=SC1090
   source "/opt/rh/${scl}/enable"
-
-  # suppress xtrace for eval
-  set +o xtrace
-  eval "$shopts"
 }
 
 # Ensure that the desired cc will be in use either by managling the env to
