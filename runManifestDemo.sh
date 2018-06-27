@@ -1,7 +1,7 @@
 #!/bin/bash
 # Run the demo code to test DM algorithms
 
-set -e
+set -eo pipefail
 
 # https://github.com/lsst/lsst_dm_stack_demo/archive/master.tar.gz
 DEMO_BASE_URL=${DEMO_BASE_URL:-https://github.com/lsst/lsst_dm_stack_demo/archive}

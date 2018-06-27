@@ -2,7 +2,7 @@
 
 # build eups products using lsstsw
 
-set -e
+set -eo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 # shellcheck source=./settings.cfg.sh

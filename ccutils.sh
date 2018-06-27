@@ -1,6 +1,6 @@
 # shellcheck shell=bash
 
-set -e
+set -eo pipefail
 
 cc::print_error() {
   >&2 echo -e "$@"
