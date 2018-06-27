@@ -196,12 +196,9 @@ if [[ $BUILD_DOCS == true ]]; then
   start_section "doc build"
 
   print_info "Start Documentation build at: $(date)"
-  set +e
-  "${SCRIPT_DIR}/create_xlinkdocs.sh" --type "master" --path "$DOC_PUSH_PATH"
-  RET=$?
-  set -e
-
-  if [[ $RET -ne 0 ]]; then
+  if ! "${SCRIPT_DIR}/create_xlinkdocs.sh" \
+    --type "master" \
+    --path "$DOC_PUSH_PATH"; then
     fail "*** FAILURE: Doxygen document was not installed."
   fi
   print_success "Doxygen Documentation was installed successfully."
