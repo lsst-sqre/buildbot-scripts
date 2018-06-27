@@ -1,0 +1,39 @@
+---
+sudo: false
+language: c
+matrix:
+  include:
+    - env: TEST=rubocop
+      language: ruby
+      rvm: &ruby_ver '2.5'
+      script: bundle exec rubocop
+
+    - env: TEST=rspec-bash
+      language: ruby
+      rvm: *ruby_ver
+      script: bundle exec rspec --format doc
+
+    - env: TEST=markdownlint
+      language: c
+      services:
+        - docker
+      script: ./tests/mdl.sh
+
+    - env: TEST=shellcheck
+      language: c
+      services:
+        - docker
+      script: ./tests/shellcheck.sh
+
+    - env: TEST=yamllint
+      language: c
+      services:
+        - docker
+      script: ./tests/yamllint.sh
+branches:
+  only:
+    - master
+    # also matched against tag pushes
+    - /^\d+\.\d+\.\d+$/
+notifications:
+  email: false
