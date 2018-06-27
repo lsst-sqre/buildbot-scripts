@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 # Build cross linked doxygen documents and load into directory hierarchy
 # intended to be exposed via a web-server.
