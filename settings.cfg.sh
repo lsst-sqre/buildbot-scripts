@@ -1,6 +1,6 @@
-#!/bin/bash
-# shellcheck disable=SC2034
+# shellcheck shell=bash
 
+# shellcheck disable=SC2034
 # general
 LSSTSW=${LSSTSW:-$HOME/lsstsw}
 LSSTSW_BUILD_DIR=${LSSTSW_BUILD_DIR:-${LSSTSW}/build}
