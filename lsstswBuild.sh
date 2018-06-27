@@ -2,13 +2,13 @@
 
 # build eups products using lsstsw
 
-set -eo pipefail
-
 SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 # shellcheck source=./settings.cfg.sh
 source "${SCRIPT_DIR}/settings.cfg.sh"
 # shellcheck source=/dev/null
 source "${LSSTSW}/bin/setup.sh"
+
+set -eo pipefail
 
 # Reuse an existing lsstsw installation
 BUILD_DOCS=true

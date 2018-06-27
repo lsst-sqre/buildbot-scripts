@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -eo pipefail
-
 # Build cross linked doxygen documents and load into directory hierarchy
 # intended to be exposed via a web-server.
 
@@ -10,6 +8,8 @@ SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 source "${SCRIPT_DIR}/settings.cfg.sh"
 # shellcheck source=/dev/null
 source "${LSSTSW}/bin/setup.sh"
+
+set -eo pipefail
 
 print_error() {
   >&2 echo -e "$@"
