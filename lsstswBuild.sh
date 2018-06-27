@@ -1,11 +1,6 @@
 #!/bin/bash
-#  Install the DM code stack using the lsstsw package procedure: rebuild
 
-# /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
-#  This script modifies the actual DM stack on the cluster. It therefore
-#  explicitly checks literal strings to ensure that non-standard buildbot
-#  expectations regarding the 'work' directory location are  equivalent.
-# /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+# build eups products using lsstsw
 
 set -e
 
