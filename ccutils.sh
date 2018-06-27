@@ -86,18 +86,14 @@ cc::setup() {
       export LDSHARED="${CC} -shared"
       ;;
     gcc-system)
-      set +e
-      cc_path=$(type -p gcc)
-      set -e
+      cc_path=$(cc::has_cmd gcc)
       sys_cc_path='/usr/bin/gcc'
 
       cc::check_cc_path "$cc_path"
       cc::check_sys_cc "$cc_path" "$sys_cc_path"
       ;;
     clang* | ^clang*)
-      set +e
-      cc_path=$(type -p clang)
-      set -e
+      cc_path=$(cc::has_cmd clang)
       sys_cc_path='/usr/bin/clang'
 
       cc::check_cc_path "$cc_path"
