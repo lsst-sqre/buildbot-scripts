@@ -13,6 +13,17 @@ cc::fail() {
   exit $code
 }
 
+# print path of $1 or fail
+cc::has_cmd() {
+  local command=${1?command is required}
+
+  if ! output=$(command -v "$command" 2>&1); then
+    cc::fail "command ${command} appears to be missing from PATH"
+  fi
+
+  echo "$output"
+}
+
 cc::check_cc_path() {
   local cc_path=${1?cc_path is required}
 
