@@ -12,7 +12,7 @@ set -e
 SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 # shellcheck source=./settings.cfg.sh
 source "${SCRIPT_DIR}/settings.cfg.sh"
-# shellcheck source=../lsstsw/bin/setup.sh
+# shellcheck source=/dev/null
 source "${LSSTSW}/bin/setup.sh"
 
 # Reuse an existing lsstsw installation
