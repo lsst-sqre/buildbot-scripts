@@ -111,11 +111,12 @@ cc::setup() {
 }
 
 # Accept/setup the first compiler, starting from the left hand side, of the
-# space seperated list of compiler strings.
+# space seperated list of compiler strings.  Note that this is intentionally
+# accepting a single argument which is split on whitespace.
 cc::setup_first() {
   local compilers=${1?compilers string is required}
 
-  declare -a candidates=($compilers)
+  IFS=" " read -r -a candidates <<< "$compilers"
   # this... intersting expression is required to work with bash < 4.2 -- thank
   # you OSX
   local last=${candidates[${#candidates[@]}-1]}
