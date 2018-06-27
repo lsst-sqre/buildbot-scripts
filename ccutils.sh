@@ -13,6 +13,17 @@ cc::fail() {
   exit $code
 }
 
+# print path of $1 or fail
+cc::has_cmd() {
+  local command=${1?command is required}
+
+  if ! output=$(command -v "$command" 2>&1); then
+    cc::fail "command ${command} appears to be missing from PATH"
+  fi
+
+  echo "$output"
+}
+
 cc::check_cc_path() {
   local cc_path=${1?cc_path is required}
 
@@ -40,21 +51,12 @@ cc::check_scl_collection() {
 cc::scl_source() {
   local scl=${1?scl is required}
 
-  # force xtrace for enable script so we know something happened
-  local shopts
-  shopts=$(set +o)
-  set -o xtrace
-
   # XXX scl_source seems to be broken on el6 as `/usr/bin/scl_enabled
   # devtoolset-3` is always exiting 1. Directly sourcing the enable script
   # seem to work across el6/7.
   # source scl_source enable "$compiler"
   # shellcheck disable=SC1090
   source "/opt/rh/${scl}/enable"
-
-  # suppress xtrace for eval
-  set +o xtrace
-  eval "$shopts"
 }
 
 # Ensure that the desired cc will be in use either by managling the env to
@@ -84,18 +86,14 @@ cc::setup() {
       export LDSHARED="${CC} -shared"
       ;;
     gcc-system)
-      set +e
-      cc_path=$(type -p gcc)
-      set -e
+      cc_path=$(cc::has_cmd gcc)
       sys_cc_path='/usr/bin/gcc'
 
       cc::check_cc_path "$cc_path"
       cc::check_sys_cc "$cc_path" "$sys_cc_path"
       ;;
     clang* | ^clang*)
-      set +e
-      cc_path=$(type -p clang)
-      set -e
+      cc_path=$(cc::has_cmd clang)
       sys_cc_path='/usr/bin/clang'
 
       cc::check_cc_path "$cc_path"
@@ -120,27 +118,26 @@ cc::setup() {
 }
 
 # Accept/setup the first compiler, starting from the left hand side, of the
-# space seperated list of compiler strings.
+# space seperated list of compiler strings.  Note that this is intentionally
+# accepting a single argument which is split on whitespace.
 cc::setup_first() {
   local compilers=${1?compilers string is required}
 
-  declare -a canidates=($compilers)
+  IFS=" " read -r -a candidates <<< "$compilers"
   # this... intersting expression is required to work with bash < 4.2 -- thank
   # you OSX
-  local last=${canidates[${#canidates[@]}-1]}
+  local last=${candidates[${#candidates[@]}-1]}
 
-  for cc in "${canidates[@]}"; do
+  for cc in "${candidates[@]}"; do
     if [[ $cc == "$last" ]]; then
       # allow stdout/stderr/exit output from final canidate
       cc::setup "$cc"
     else
-      set +e
       # block stdout/stderr/exit from candiates that may fail
       # using a subshell to ignore exit
       if (cc::setup "$cc" > /dev/null 2>&1); then
         break
       fi
-      set -e
     fi
   done
 }
