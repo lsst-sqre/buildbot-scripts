@@ -115,12 +115,12 @@ cc::setup() {
 cc::setup_first() {
   local compilers=${1?compilers string is required}
 
-  declare -a canidates=($compilers)
+  declare -a candidates=($compilers)
   # this... intersting expression is required to work with bash < 4.2 -- thank
   # you OSX
-  local last=${canidates[${#canidates[@]}-1]}
+  local last=${candidates[${#candidates[@]}-1]}
 
-  for cc in "${canidates[@]}"; do
+  for cc in "${candidates[@]}"; do
     if [[ $cc == "$last" ]]; then
       # allow stdout/stderr/exit output from final canidate
       cc::setup "$cc"
