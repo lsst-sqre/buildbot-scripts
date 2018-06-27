@@ -126,13 +126,11 @@ cc::setup_first() {
       # allow stdout/stderr/exit output from final canidate
       cc::setup "$cc"
     else
-      set +e
       # block stdout/stderr/exit from candiates that may fail
       # using a subshell to ignore exit
       if (cc::setup "$cc" > /dev/null 2>&1); then
         break
       fi
-      set -e
     fi
   done
 }
