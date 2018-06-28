@@ -1,14 +1,15 @@
-#!/bin/bash
+# shellcheck shell=bash
 
-set -e
+set -euo pipefail
 
 cc::print_error() {
   >&2 echo -e "$@"
 }
 
 cc::fail() {
+  local msg=${1:-''}
   local code=${2:-1}
-  [[ -n $1 ]] && cc::print_error "$1"
+  [[ -n $msg ]] && cc::print_error "$msg"
   # shellcheck disable=SC2086
   exit $code
 }
@@ -56,7 +57,10 @@ cc::scl_source() {
   # seem to work across el6/7.
   # source scl_source enable "$compiler"
   # shellcheck disable=SC1090
+  set +u
+  # shellcheck source=/dev/null
   source "/opt/rh/${scl}/enable"
+  set -u
 }
 
 # Ensure that the desired cc will be in use either by managling the env to

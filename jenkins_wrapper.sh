@@ -1,10 +1,10 @@
 #!/bin/bash
 
-set -xe
-
 SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 # shellcheck source=./ccutils.sh
 source "${SCRIPT_DIR}/ccutils.sh"
+
+set -xeuo pipefail
 
 # This script is a thin wrapper around `lsstswBuild.sh` and is only intended to
 # be useful when executed by jenkins.  It assumes that the `lsst/lsstsw` and
@@ -13,16 +13,30 @@ source "${SCRIPT_DIR}/ccutils.sh"
 
 # The following environment variables are assumed to be declared by the caller:
 #
-# * BRANCH
-# * deploy
-# * NO_FETCH
-# * PRODUCT
 # * LSST_COMPILER
 # * LSST_PYTHON_VERSION
+#
+# optional:
+#
+# * BRANCH
+# * deploy
+# * PRODUCT
+# * NO_FETCH
 # * SKIP_DEMO
 # * SKIP_DOCS
 # * PREP_ONLY
 #
+
+BRANCH=${BRANCH:-''}
+deploy=${deploy:-''}
+PRODUCT=${PRODUCT:-''}
+LSST_COMPILER=${LSST_COMPILER?LSST_COMPILER is required}
+LSST_PYTHON_VERSION=${LSST_PYTHON_VERSION?LSST_PYTHON_VERSION is required}
+
+NO_FETCH=${NO_FETCH:-false}
+SKIP_DEMO=${SKIP_DEMO:-false}
+SKIP_DOCS=${SKIP_DOCS:-false}
+PREP_ONLY=${PREP_ONLY:-false}
 
 ARGS=()
 

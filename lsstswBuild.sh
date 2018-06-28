@@ -1,19 +1,14 @@
 #!/bin/bash
-#  Install the DM code stack using the lsstsw package procedure: rebuild
 
-# /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
-#  This script modifies the actual DM stack on the cluster. It therefore
-#  explicitly checks literal strings to ensure that non-standard buildbot
-#  expectations regarding the 'work' directory location are  equivalent.
-# /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
-
-set -e
+# build eups products using lsstsw
 
 SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 # shellcheck source=./settings.cfg.sh
 source "${SCRIPT_DIR}/settings.cfg.sh"
 # shellcheck source=/dev/null
 source "${LSSTSW}/bin/setup.sh"
+
+set -eo pipefail
 
 # Reuse an existing lsstsw installation
 BUILD_DOCS=true
@@ -196,12 +191,9 @@ if [[ $BUILD_DOCS == true ]]; then
   start_section "doc build"
 
   print_info "Start Documentation build at: $(date)"
-  set +e
-  "${SCRIPT_DIR}/create_xlinkdocs.sh" --type "master" --path "$DOC_PUSH_PATH"
-  RET=$?
-  set -e
-
-  if [[ $RET -ne 0 ]]; then
+  if ! "${SCRIPT_DIR}/create_xlinkdocs.sh" \
+    --type "master" \
+    --path "$DOC_PUSH_PATH"; then
     fail "*** FAILURE: Doxygen document was not installed."
   fi
   print_success "Doxygen Documentation was installed successfully."
