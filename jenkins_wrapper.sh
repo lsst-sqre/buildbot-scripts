@@ -4,7 +4,7 @@ SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 # shellcheck source=./ccutils.sh
 source "${SCRIPT_DIR}/ccutils.sh"
 
-set -xeuo pipefail
+set -xeo pipefail
 
 # This script is a thin wrapper around `lsstswBuild.sh` and is only intended to
 # be useful when executed by jenkins.  It assumes that the `lsst/lsstsw` and
