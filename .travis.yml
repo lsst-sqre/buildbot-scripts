@@ -3,32 +3,29 @@ sudo: false
 language: c
 matrix:
   include:
-    - env: TEST=rubocop
+    - &ruby
+      env: TEST=rubocop
       language: ruby
-      rvm: &ruby_ver '2.5'
+      rvm: '2.5'
       script: bundle exec rubocop
 
-    - env: TEST=rspec-bash
-      language: ruby
-      rvm: *ruby_ver
+    - <<: *ruby
+      env: TEST=rspec-bash
       script: bundle exec rspec --format doc
 
-    - env: TEST=markdownlint
+    - &plumb
+      env: TEST=markdownlint
       language: c
       services:
         - docker
       script: ./tests/mdl.sh
 
-    - env: TEST=shellcheck
-      language: c
-      services:
-        - docker
+    - <<: *plumb
+      env: TEST=shellcheck
       script: ./tests/shellcheck.sh
 
-    - env: TEST=yamllint
-      language: c
-      services:
-        - docker
+    - <<: *plumb
+      env: TEST=yamllint
       script: ./tests/yamllint.sh
 branches:
   only:
