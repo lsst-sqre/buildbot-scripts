@@ -39,7 +39,7 @@ PLATFORMS
 
 DEPENDENCIES
   rspec
-  rspec-bash
+  rspec-bash (~> 0.3.0)
   rubocop (~> 0.53.0)
 
 BUNDLED WITH
