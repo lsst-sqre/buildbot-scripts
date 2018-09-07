@@ -74,7 +74,6 @@ end_section() {
   echo
 }
 
-# XXX PRODUCT would be better handled as arrays
 # shellcheck disable=SC2054 disable=SC2034
 options=(getopt --long refs:,products:,skip_docs,no-fetch,print-fail,color,prepare-only -- "$@")
 while true
@@ -93,6 +92,7 @@ do
 done
 
 IFS=' ' read -r -a REF_LIST <<< "$GIT_REFS"
+IFS=' ' read -r -a PRODUCT_LIST <<< "$PRODUCTS"
 
 #
 # display configuration
@@ -156,11 +156,8 @@ fi
   for r in ${REF_LIST[*]}; do
     ARGS+=('-r' "$r")
   done
-if [[ ! -z $PRODUCTS ]]; then
-  # XXX intentionally not quoted to allow word splitting
-  # shellcheck disable=SC2206
-  ARGS+=($PRODUCTS)
-fi
+[[ ${#PRODUCT_LIST[@]} -ne 0 ]] &&
+  ARGS+=("${PRODUCTS[@]}")
 
 if ! "${LSSTSW}/bin/rebuild" "${ARGS[@]}"; then
   fail 'Failed during rebuild of DM stack.'
