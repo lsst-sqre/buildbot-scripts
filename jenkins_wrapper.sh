@@ -76,12 +76,6 @@ if [[ $PREP_ONLY == true ]]; then
   ARGS+=('--prepare-only')
 fi
 
-# require that $LSST_COMPILER is defined
-if [[ -z $LSST_COMPILER ]]; then
-  >&2 echo -e 'LSST_COMPILER is not defined'
-  exit 1
-fi
-
 cc::setup_first "$LSST_COMPILER"
 
 export LSSTSW=${LSSTSW:-$WORKSPACE/lsstsw}
