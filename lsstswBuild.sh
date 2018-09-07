@@ -11,7 +11,7 @@ source "${LSSTSW}/bin/setup.sh"
 set -eo pipefail
 
 # Reuse an existing lsstsw installation
-BUILD_DOCS=true
+BUILD_DOCS=false
 GIT_REFS=''
 PRODUCTS=''
 NO_FETCH=false
@@ -75,13 +75,13 @@ end_section() {
 }
 
 # shellcheck disable=SC2054 disable=SC2034
-options=(getopt --long refs:,products:,skip_docs,no-fetch,print-fail,color,prepare-only -- "$@")
+options=(getopt --long refs:,products:,docs,no-fetch,print-fail,color,prepare-only -- "$@")
 while true
 do
   case "$1" in
     --refs)         GIT_REFS=$2       ; shift 2 ;;
     --products)     PRODUCTS=$2       ; shift 2 ;;
-    --skip_docs)    BUILD_DOCS=false  ; shift 1 ;;
+    --docs)         BUILD_DOCS=true   ; shift 1 ;;
     --no-fetch)     NO_FETCH=true     ; shift 1 ;;
     --color)        COLORIZE=true     ; shift 1 ;;
     --prepare-only) PREP_ONLY=true    ; shift 1 ;;
