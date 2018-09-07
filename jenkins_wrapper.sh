@@ -18,37 +18,53 @@ set -xeo pipefail
 #
 # optional:
 #
-# * BRANCH
+# * REFS
+# * PRODUCTS
 # * deploy
-# * PRODUCT
 # * NO_FETCH
 # * SKIP_DOCS
 # * PREP_ONLY
 #
 # removed/fatal
+# * BRANCH
+# * PRODUCT
 # * SKIP_DEMO
 
-if [[ -z ${SKIP_DEMO+x} ]]; then
-  >&2 echo -e 'SKIP_DEMO is not supported'
-  exit 1
-fi
-
-BRANCH=${BRANCH:-''}
-PRODUCT=${PRODUCT:-lsst_distrib lsst_ci}
-deploy=${deploy:-''}
 LSST_COMPILER=${LSST_COMPILER?LSST_COMPILER is required}
 LSST_PYTHON_VERSION=${LSST_PYTHON_VERSION?LSST_PYTHON_VERSION is required}
 
+REFS=${REFS:-''}
+PRODUCTS=${PRODUCTS:-lsst_distrib lsst_ci}
+deploy=${deploy:-''}
 NO_FETCH=${NO_FETCH:-false}
 SKIP_DOCS=${SKIP_DOCS:-false}
 PREP_ONLY=${PREP_ONLY:-false}
 
-ARGS=()
+fatal_vars() {
+  local problems=(
+    BRANCH
+    PRODUCT
+    SKIP_DEMO
+  )
+  local found=()
 
+  for v in ${problems[*]}; do
+    if [[ -n ${!v+1} ]]; then
+      found+=("$v")
+      >&2 echo -e "${v} is not supported"
+    fi
+  done
+
+  [[ ${#found[@]} -ne 0 ]] && exit 1
+  return 0
+}
+fatal_vars
+
+ARGS=()
 ARGS+=('--color')
 
-[[ -n $BRANCH ]] &&  ARGS+=('--branch' "$BRANCH")
-[[ -n $PRODUCT ]] && ARGS+=('--product' "$PRODUCT")
+[[ -n $REFS ]] &&  ARGS+=('--refs' "$REFS")
+[[ -n $PRODUCTS ]] && ARGS+=('--products' "$PRODUCTS")
 
 [[ $SKIP_DOCS == true ]] && ARGS+=('--skip_docs')
 [[ $NO_FETCH == true ]] &&  ARGS+=('--no-fetch')
