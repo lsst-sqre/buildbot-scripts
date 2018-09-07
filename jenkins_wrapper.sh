@@ -45,28 +45,14 @@ PREP_ONLY=${PREP_ONLY:-false}
 
 ARGS=()
 
-if [[ ! -z $BRANCH ]]; then
-  ARGS+=('--branch')
-  ARGS+=("$BRANCH")
-fi
-
-if [[ ! -z $PRODUCT ]]; then
-  ARGS+=('--product')
-  ARGS+=("$PRODUCT")
-fi
-
-if [[ $SKIP_DOCS == true ]]; then
-  ARGS+=('--skip_docs')
-fi
-
 ARGS+=('--color')
 
-if [[ $NO_FETCH == true ]]; then
-  ARGS+=('--no-fetch')
-fi
-if [[ $PREP_ONLY == true ]]; then
-  ARGS+=('--prepare-only')
-fi
+[[ -n $BRANCH ]] &&  ARGS+=('--branch' "$BRANCH")
+[[ -n $PRODUCT ]] && ARGS+=('--product' "$PRODUCT")
+
+[[ $SKIP_DOCS == true ]] && ARGS+=('--skip_docs')
+[[ $NO_FETCH == true ]] &&  ARGS+=('--no-fetch')
+[[ $PREP_ONLY == true ]] && ARGS+=('--prepare-only')
 
 cc::setup_first "$LSST_COMPILER"
 
