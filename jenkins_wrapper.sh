@@ -20,7 +20,7 @@ set -xeo pipefail
 #
 # * LSST_REFS
 # * LSST_PRODUCTS
-# * deploy
+# * LSST_DEPLOY_MODE
 # * NO_FETCH
 # * SKIP_DOCS
 # * PREP_ONLY
@@ -29,13 +29,14 @@ set -xeo pipefail
 # * BRANCH
 # * PRODUCT
 # * SKIP_DEMO
+# * deploy
 
 LSST_COMPILER=${LSST_COMPILER?LSST_COMPILER is required}
 LSST_PYTHON_VERSION=${LSST_PYTHON_VERSION?LSST_PYTHON_VERSION is required}
 
 LSST_REFS=${LSST_REFS:-}
 LSST_PRODUCTS=${LSST_PRODUCTS:-lsst_distrib lsst_ci}
-deploy=${deploy:-''}
+LSST_DEPLOY_MODE=${LSST_DEPLOY_MODE:-}
 NO_FETCH=${NO_FETCH:-false}
 SKIP_DOCS=${SKIP_DOCS:-false}
 PREP_ONLY=${PREP_ONLY:-false}
@@ -45,6 +46,7 @@ fatal_vars() {
     BRANCH
     PRODUCT
     SKIP_DEMO
+    deploy
   )
   local found=()
 
@@ -106,7 +108,7 @@ esac
   fi
 
   # shellcheck disable=SC2154
-  if [[ $deploy == bleed ]]; then
+  if [[ $LSST_DEPLOY_MODE == bleed ]]; then
     OPTS+=('-b')
   fi
 
