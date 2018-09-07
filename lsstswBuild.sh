@@ -146,18 +146,16 @@ fi
 print_info "Rebuild is commencing....stand by; using $REF_LIST"
 
 ARGS=()
-if [[ $NO_FETCH == true ]]; then
-  ARGS+=("-n")
-fi
-if [[ $PREP_ONLY == true ]]; then
-  ARGS+=("-p")
-fi
+
+[[ $NO_FETCH == true ]] &&  ARGS+=('-n')
+[[ $PREP_ONLY == true ]] && ARGS+=('-p')
+
 [[ ${#REF_LIST[@]} -ne 0 ]] &&
   for r in ${REF_LIST[*]}; do
     ARGS+=('-r' "$r")
   done
 [[ ${#PRODUCT_LIST[@]} -ne 0 ]] &&
-  ARGS+=("${PRODUCTS[@]}")
+  ARGS+=("${PRODUCTS_LIST[@]}")
 
 if ! "${LSSTSW}/bin/rebuild" "${ARGS[@]}"; then
   fail 'Failed during rebuild of DM stack.'
