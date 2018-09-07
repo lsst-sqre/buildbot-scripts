@@ -74,7 +74,7 @@ end_section() {
   echo
 }
 
-# XXX REF_LIST and PRODUCT would be better handled as arrays
+# XXX PRODUCT would be better handled as arrays
 # shellcheck disable=SC2054 disable=SC2034
 options=(getopt --long refs:,products:,skip_docs,no-fetch,print-fail,color,prepare-only -- "$@")
 while true
@@ -92,9 +92,7 @@ do
   esac
 done
 
-# mangle whitespace and prepend ` -r ` in front of each ref
-REF_LIST=$(echo "$GIT_REFS" | sed  -e 's/ \+ / /g' -e 's/^/ /' -e 's/ $//' -e 's/ / -r /g')
-
+IFS=' ' read -r -a REF_LIST <<< "$GIT_REFS"
 
 #
 # display configuration
@@ -114,7 +112,6 @@ settings=(
   LSSTSW_BUILD_DIR
   NO_FETCH
   PRODUCTS
-  REF_LIST
 )
 
 set_color "$LIGHT_CYAN"
@@ -155,11 +152,10 @@ fi
 if [[ $PREP_ONLY == true ]]; then
   ARGS+=("-p")
 fi
-if [[ ! -z $REF_LIST ]]; then
-  # XXX intentionally not quoted to allow word splitting
-  # shellcheck disable=SC2206
-  ARGS+=($REF_LIST)
-fi
+[[ ${#REF_LIST[@]} -ne 0 ]] &&
+  for r in ${REF_LIST[*]}; do
+    ARGS+=('-r' "$r")
+  done
 if [[ ! -z $PRODUCTS ]]; then
   # XXX intentionally not quoted to allow word splitting
   # shellcheck disable=SC2206
