@@ -13,7 +13,7 @@ set -eo pipefail
 # Reuse an existing lsstsw installation
 BUILD_DOCS=true
 GIT_REFS=''
-PRODUCT=""
+PRODUCTS=''
 NO_FETCH=false
 COLORIZE=false
 
@@ -76,12 +76,12 @@ end_section() {
 
 # XXX REF_LIST and PRODUCT would be better handled as arrays
 # shellcheck disable=SC2054 disable=SC2034
-options=(getopt --long refs:,product:,skip_docs,no-fetch,print-fail,color,prepare-only -- "$@")
+options=(getopt --long refs:,products:,skip_docs,no-fetch,print-fail,color,prepare-only -- "$@")
 while true
 do
   case "$1" in
     --refs)         GIT_REFS=$2       ; shift 2 ;;
-    --product)      PRODUCT=$2        ; shift 2 ;;
+    --products)     PRODUCTS=$2       ; shift 2 ;;
     --skip_docs)    BUILD_DOCS=false  ; shift 1 ;;
     --no-fetch)     NO_FETCH=true     ; shift 1 ;;
     --color)        COLORIZE=true     ; shift 1 ;;
@@ -113,7 +113,7 @@ settings=(
   LSSTSW
   LSSTSW_BUILD_DIR
   NO_FETCH
-  PRODUCT
+  PRODUCTS
   REF_LIST
 )
 
@@ -160,10 +160,10 @@ if [[ ! -z $REF_LIST ]]; then
   # shellcheck disable=SC2206
   ARGS+=($REF_LIST)
 fi
-if [[ ! -z $PRODUCT ]]; then
+if [[ ! -z $PRODUCTS ]]; then
   # XXX intentionally not quoted to allow word splitting
   # shellcheck disable=SC2206
-  ARGS+=($PRODUCT)
+  ARGS+=($PRODUCTS)
 fi
 
 if ! "${LSSTSW}/bin/rebuild" "${ARGS[@]}"; then
