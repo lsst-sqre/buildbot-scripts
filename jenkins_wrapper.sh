@@ -22,32 +22,28 @@ set -xeo pipefail
 # * deploy
 # * PRODUCT
 # * NO_FETCH
-# * SKIP_DEMO
 # * SKIP_DOCS
 # * PREP_ONLY
 #
+# removed/fatal
+# * SKIP_DEMO
+
+if [[ -z ${SKIP_DEMO+x} ]]; then
+  >&2 echo -e 'SKIP_DEMO is not supported'
+  exit 1
+fi
 
 BRANCH=${BRANCH:-''}
+PRODUCT=${PRODUCT:-lsst_distrib lsst_ci}
 deploy=${deploy:-''}
-PRODUCT=${PRODUCT:-''}
 LSST_COMPILER=${LSST_COMPILER?LSST_COMPILER is required}
 LSST_PYTHON_VERSION=${LSST_PYTHON_VERSION?LSST_PYTHON_VERSION is required}
 
 NO_FETCH=${NO_FETCH:-false}
-SKIP_DEMO=${SKIP_DEMO:-false}
 SKIP_DOCS=${SKIP_DOCS:-false}
 PREP_ONLY=${PREP_ONLY:-false}
 
 ARGS=()
-
-# append lsst_ci to PRODUCT list unless SKIP_DEMO is set
-if [[ $SKIP_DEMO != true ]]; then
-  if [[ -z $PRODUCT ]]; then
-    # lsstsw default targets
-    PRODUCT="lsst_distrib qserv_distrib dax_webserv"
-  fi
-  PRODUCT="$PRODUCT lsst_ci"
-fi
 
 if [[ ! -z $BRANCH ]]; then
   ARGS+=('--branch')
@@ -64,10 +60,6 @@ if [[ $SKIP_DOCS == true ]]; then
 fi
 
 ARGS+=('--color')
-
-if [[ $SKIP_DEMO == true ]]; then
-  ARGS+=('--skip_demo')
-fi
 
 if [[ $NO_FETCH == true ]]; then
   ARGS+=('--no-fetch')
