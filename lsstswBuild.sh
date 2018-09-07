@@ -12,7 +12,6 @@ set -eo pipefail
 
 # Reuse an existing lsstsw installation
 BUILD_DOCS=true
-RUN_DEMO=true
 PRODUCT=""
 NO_FETCH=false
 COLORIZE=false
@@ -77,14 +76,13 @@ end_section() {
 # XXX note that BRANCH is actually git refs
 # XXX REF_LIST and PRODUCT would be better handled as arrays
 # shellcheck disable=SC2054 disable=SC2034
-options=(getopt --long branch:,product:,skip_docs,skip_demo,no-fetch,print-fail,color,prepare-only -- "$@")
+options=(getopt --long branch:,product:,skip_docs,no-fetch,print-fail,color,prepare-only -- "$@")
 while true
 do
   case "$1" in
     --branch)       BRANCH=$2         ; shift 2 ;;
     --product)      PRODUCT=$2        ; shift 2 ;;
     --skip_docs)    BUILD_DOCS=false  ; shift 1 ;;
-    --skip_demo)    RUN_DEMO=false    ; shift 1 ;;
     --no-fetch)     NO_FETCH=true     ; shift 1 ;;
     --color)        COLORIZE=true     ; shift 1 ;;
     --prepare-only) PREP_ONLY=true    ; shift 1 ;;
@@ -117,7 +115,6 @@ settings=(
   NO_FETCH
   PRODUCT
   REF_LIST
-  RUN_DEMO
 )
 
 set_color "$LIGHT_CYAN"
@@ -201,36 +198,6 @@ if [[ $BUILD_DOCS == true ]]; then
   end_section # doc build"
 else
   print_info "Skipping Documentation build."
-fi
-
-
-#
-# Finally run a simple test of package integration
-#
-if [[ $RUN_DEMO == true ]]; then
-  start_section "demo"
-
-  # run demo script from the source checkout dir as it will download and
-  # unpack a tarball
-  cd "$LSSTSW_BUILD_DIR"
-
-  ARGS=()
-  ARGS+=(--eups-tag "$MANIFEST_ID")
-  ARGS+=(--small)
-  ARGS+=(--debug)
-  for ref in $BRANCH; do
-    ARGS+=(--git-ref "$ref")
-  done
-
-  print_info "Start Demo run at: $(date)"
-  if ! "${SCRIPT_DIR}/runManifestDemo.sh" "${ARGS[@]}"; then
-    fail "*** There was an error running the simple integration demo."
-  fi
-  print_success "The simple integration demo was successfully run."
-
-  end_section # demo
-else
-  print_info "Skipping Demo."
 fi
 
 # vim: tabstop=2 shiftwidth=2 expandtab
