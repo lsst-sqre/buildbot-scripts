@@ -19,7 +19,7 @@ set -xeo pipefail
 # optional:
 #
 # * LSST_REFS
-# * PRODUCTS
+# * LSST_PRODUCTS
 # * deploy
 # * NO_FETCH
 # * SKIP_DOCS
@@ -34,7 +34,7 @@ LSST_COMPILER=${LSST_COMPILER?LSST_COMPILER is required}
 LSST_PYTHON_VERSION=${LSST_PYTHON_VERSION?LSST_PYTHON_VERSION is required}
 
 LSST_REFS=${LSST_REFS:-}
-PRODUCTS=${PRODUCTS:-lsst_distrib lsst_ci}
+LSST_PRODUCTS=${LSST_PRODUCTS:-lsst_distrib lsst_ci}
 deploy=${deploy:-''}
 NO_FETCH=${NO_FETCH:-false}
 SKIP_DOCS=${SKIP_DOCS:-false}
@@ -64,7 +64,7 @@ ARGS=()
 ARGS+=('--color')
 
 [[ -n $LSST_REFS ]] &&  ARGS+=('--refs' "$LSST_REFS")
-[[ -n $PRODUCTS ]] && ARGS+=('--products' "$PRODUCTS")
+[[ -n $LSST_PRODUCTS ]] && ARGS+=('--products' "$LSST_PRODUCTS")
 
 [[ $SKIP_DOCS == true ]] && ARGS+=('--skip_docs')
 [[ $NO_FETCH == true ]] &&  ARGS+=('--no-fetch')
