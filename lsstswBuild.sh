@@ -12,6 +12,7 @@ set -eo pipefail
 
 # Reuse an existing lsstsw installation
 BUILD_DOCS=true
+GIT_REFS=''
 PRODUCT=""
 NO_FETCH=false
 COLORIZE=false
@@ -73,14 +74,13 @@ end_section() {
   echo
 }
 
-# XXX note that BRANCH is actually git refs
 # XXX REF_LIST and PRODUCT would be better handled as arrays
 # shellcheck disable=SC2054 disable=SC2034
-options=(getopt --long branch:,product:,skip_docs,no-fetch,print-fail,color,prepare-only -- "$@")
+options=(getopt --long refs:,product:,skip_docs,no-fetch,print-fail,color,prepare-only -- "$@")
 while true
 do
   case "$1" in
-    --branch)       BRANCH=$2         ; shift 2 ;;
+    --refs)         GIT_REFS=$2       ; shift 2 ;;
     --product)      PRODUCT=$2        ; shift 2 ;;
     --skip_docs)    BUILD_DOCS=false  ; shift 1 ;;
     --no-fetch)     NO_FETCH=true     ; shift 1 ;;
@@ -93,7 +93,7 @@ do
 done
 
 # mangle whitespace and prepend ` -r ` in front of each ref
-REF_LIST=$(echo "$BRANCH" | sed  -e 's/ \+ / /g' -e 's/^/ /' -e 's/ $//' -e 's/ / -r /g')
+REF_LIST=$(echo "$GIT_REFS" | sed  -e 's/ \+ / /g' -e 's/^/ /' -e 's/ $//' -e 's/ / -r /g')
 
 
 #
@@ -103,13 +103,13 @@ start_section "configuration"
 
 # print "settings"
 settings=(
-  BRANCH
   BUILD_DOCS
   COLORIZE
   DOC_PUSH_PATH
   DOC_REPO_DIR
   DOC_REPO_NAME
   DOC_REPO_URL
+  GIT_REFS
   LSSTSW
   LSSTSW_BUILD_DIR
   NO_FETCH
