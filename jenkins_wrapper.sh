@@ -21,15 +21,16 @@ set -xeo pipefail
 # * LSST_BUILD_DOCS
 # * LSST_DEPLOY_MODE
 # * LSST_NO_FETCH
+# * LSST_PREP_ONLY
 # * LSST_PRODUCTS
 # * LSST_REFS
-# * PREP_ONLY
 #
 # removed/fatal:
 #
 # * BRANCH
 # * deploy
 # * NO_FETCH
+# * PREP_ONLY
 # * PRODUCT
 # * SKIP_DEMO
 # * SKIP_DOCS
@@ -40,15 +41,16 @@ LSST_PYTHON_VERSION=${LSST_PYTHON_VERSION?LSST_PYTHON_VERSION is required}
 LSST_BUILD_DOCS=${LSST_BUILD_DOCS:-false}
 LSST_DEPLOY_MODE=${LSST_DEPLOY_MODE:-}
 LSST_NO_FETCH=${LSST_NO_FETCH:-false}
+LSST_PREP_ONLY=${LSST_PREP_ONLY:-false}
 LSST_PRODUCTS=${LSST_PRODUCTS:-lsst_distrib lsst_ci}
 LSST_REFS=${LSST_REFS:-}
-PREP_ONLY=${PREP_ONLY:-false}
 
 fatal_vars() {
   local problems=(
     BRANCH
     deploy
     NO_FETCH
+    PREP_ONLY
     PRODUCT
     SKIP_DEMO
     SKIP_DOCS
@@ -75,7 +77,7 @@ ARGS+=('--color')
 
 [[ $LSST_BUILD_DOCS == true ]] && ARGS+=('--docs')
 [[ $LSST_NO_FETCH == true ]] &&  ARGS+=('--no-fetch')
-[[ $PREP_ONLY == true ]] && ARGS+=('--prepare-only')
+[[ $LSST_PREP_ONLY == true ]] && ARGS+=('--prepare-only')
 
 cc::setup_first "$LSST_COMPILER"
 
