@@ -18,35 +18,38 @@ set -xeo pipefail
 #
 # optional:
 #
-# * LSST_REFS
-# * LSST_PRODUCTS
+# * LSST_BUILD_DOCS
 # * LSST_DEPLOY_MODE
+# * LSST_PRODUCTS
+# * LSST_REFS
 # * NO_FETCH
-# * SKIP_DOCS
 # * PREP_ONLY
 #
-# removed/fatal
+# removed/fatal:
+#
 # * BRANCH
+# * deploy
 # * PRODUCT
 # * SKIP_DEMO
-# * deploy
+# * SKIP_DOCS
 
 LSST_COMPILER=${LSST_COMPILER?LSST_COMPILER is required}
 LSST_PYTHON_VERSION=${LSST_PYTHON_VERSION?LSST_PYTHON_VERSION is required}
 
-LSST_REFS=${LSST_REFS:-}
-LSST_PRODUCTS=${LSST_PRODUCTS:-lsst_distrib lsst_ci}
+LSST_BUILD_DOCS=${LSST_BUILD_DOCS:-false}
 LSST_DEPLOY_MODE=${LSST_DEPLOY_MODE:-}
+LSST_PRODUCTS=${LSST_PRODUCTS:-lsst_distrib lsst_ci}
+LSST_REFS=${LSST_REFS:-}
 NO_FETCH=${NO_FETCH:-false}
-SKIP_DOCS=${SKIP_DOCS:-false}
 PREP_ONLY=${PREP_ONLY:-false}
 
 fatal_vars() {
   local problems=(
     BRANCH
+    deploy
     PRODUCT
     SKIP_DEMO
-    deploy
+    SKIP_DOCS
   )
   local found=()
 
@@ -68,7 +71,7 @@ ARGS+=('--color')
 [[ -n $LSST_REFS ]] &&  ARGS+=('--refs' "$LSST_REFS")
 [[ -n $LSST_PRODUCTS ]] && ARGS+=('--products' "$LSST_PRODUCTS")
 
-[[ $SKIP_DOCS == true ]] && ARGS+=('--skip_docs')
+[[ $LSST_BUILD_DOCS == true ]] && ARGS+=('--docs')
 [[ $NO_FETCH == true ]] &&  ARGS+=('--no-fetch')
 [[ $PREP_ONLY == true ]] && ARGS+=('--prepare-only')
 
