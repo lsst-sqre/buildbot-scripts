@@ -72,12 +72,12 @@ fatal_vars
 ARGS=()
 ARGS+=('--color')
 
-[[ -n $LSST_REFS ]] &&  ARGS+=('--refs' "$LSST_REFS")
+[[ -n $LSST_REFS ]] &&     ARGS+=('--refs' "$LSST_REFS")
 [[ -n $LSST_PRODUCTS ]] && ARGS+=('--products' "$LSST_PRODUCTS")
 
 [[ $LSST_BUILD_DOCS == true ]] && ARGS+=('--docs')
-[[ $LSST_NO_FETCH == true ]] &&  ARGS+=('--no-fetch')
-[[ $LSST_PREP_ONLY == true ]] && ARGS+=('--prepare-only')
+[[ $LSST_NO_FETCH == true ]] &&   ARGS+=('--no-fetch')
+[[ $LSST_PREP_ONLY == true ]] &&  ARGS+=('--prepare-only')
 
 cc::setup_first "$LSST_COMPILER"
 
