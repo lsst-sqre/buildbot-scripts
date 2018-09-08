@@ -7,7 +7,7 @@ cc::print_error() {
 }
 
 cc::fail() {
-  local msg=${1:-''}
+  local msg=${1:-}
   local code=${2:-1}
   [[ -n $msg ]] && cc::print_error "$msg"
   # shellcheck disable=SC2086

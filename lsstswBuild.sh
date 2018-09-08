@@ -12,8 +12,8 @@ set -eo pipefail
 
 # Reuse an existing lsstsw installation
 BUILD_DOCS=false
-GIT_REFS=''
-PRODUCTS=''
+GIT_REFS=
+PRODUCTS=
 NO_FETCH=false
 COLORIZE=false
 
