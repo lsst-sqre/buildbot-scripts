@@ -3,7 +3,7 @@
 # Build cross linked doxygen documents and load into directory hierarchy
 # intended to be exposed via a web-server.
 
-SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 # shellcheck source=./settings.cfg.sh
 source "${SCRIPT_DIR}/settings.cfg.sh"
 # shellcheck source=/dev/null
