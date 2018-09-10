@@ -46,7 +46,7 @@ LSST_PREP_ONLY=${LSST_PREP_ONLY:-false}
 LSST_REFS=${LSST_REFS:-}
 
 fatal_vars() {
-  local problems=(
+  local verboten=(
     BRANCH
     deploy
     NO_FETCH
@@ -57,7 +57,7 @@ fatal_vars() {
   )
   local found=()
 
-  for v in ${problems[*]}; do
+  for v in ${verboten[*]}; do
     if [[ -n ${!v+1} ]]; then
       found+=("$v")
       >&2 echo -e "${v} is not supported"
