@@ -14,6 +14,7 @@ set -xeo pipefail
 # The following environment variables are assumed to be declared by the caller:
 #
 # * LSST_COMPILER
+# * LSST_PRODUCTS
 # * LSST_PYTHON_VERSION
 #
 # optional:
@@ -22,7 +23,6 @@ set -xeo pipefail
 # * LSST_DEPLOY_MODE
 # * LSST_NO_FETCH
 # * LSST_PREP_ONLY
-# * LSST_PRODUCTS
 # * LSST_REFS
 #
 # removed/fatal:
@@ -36,13 +36,13 @@ set -xeo pipefail
 # * SKIP_DOCS
 
 LSST_COMPILER=${LSST_COMPILER?LSST_COMPILER is required}
+LSST_PRODUCTS=${LSST_PRODUCTS?LSST_PRODUCTS is required}
 LSST_PYTHON_VERSION=${LSST_PYTHON_VERSION?LSST_PYTHON_VERSION is required}
 
 LSST_BUILD_DOCS=${LSST_BUILD_DOCS:-false}
 LSST_DEPLOY_MODE=${LSST_DEPLOY_MODE:-}
 LSST_NO_FETCH=${LSST_NO_FETCH:-false}
 LSST_PREP_ONLY=${LSST_PREP_ONLY:-false}
-LSST_PRODUCTS=${LSST_PRODUCTS:-lsst_distrib lsst_ci}
 LSST_REFS=${LSST_REFS:-}
 
 fatal_vars() {
