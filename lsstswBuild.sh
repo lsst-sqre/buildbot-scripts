@@ -2,7 +2,7 @@
 
 # build eups products using lsstsw
 
-SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 # shellcheck source=./settings.cfg.sh
 source "${SCRIPT_DIR}/settings.cfg.sh"
 # shellcheck source=/dev/null
@@ -11,11 +11,12 @@ source "${LSSTSW}/bin/setup.sh"
 set -eo pipefail
 
 # Reuse an existing lsstsw installation
-BUILD_DOCS=true
-RUN_DEMO=true
-PRODUCT=""
+BUILD_DOCS=false
+GIT_REFS=
+PRODUCTS=
 NO_FETCH=false
 COLORIZE=false
+DEBUG=${DEBUG:-true}
 
 # Buildbot remotely invokes scripts with a stripped down environment.
 umask 002
@@ -74,17 +75,24 @@ end_section() {
   echo
 }
 
-# XXX note that BRANCH is actually git refs
-# XXX REF_LIST and PRODUCT would be better handled as arrays
+run() {
+  if [[ $DRYRUN == true ]]; then
+    echo "$@"
+  elif [[ $DEBUG == true ]]; then
+    (set -x; "$@")
+  else
+    "$@"
+  fi
+}
+
 # shellcheck disable=SC2054 disable=SC2034
-options=(getopt --long branch:,product:,skip_docs,skip_demo,no-fetch,print-fail,color,prepare-only -- "$@")
+options=(getopt --long refs:,products:,docs,no-fetch,print-fail,color,prepare-only -- "$@")
 while true
 do
   case "$1" in
-    --branch)       BRANCH=$2         ; shift 2 ;;
-    --product)      PRODUCT=$2        ; shift 2 ;;
-    --skip_docs)    BUILD_DOCS=false  ; shift 1 ;;
-    --skip_demo)    RUN_DEMO=false    ; shift 1 ;;
+    --refs)         GIT_REFS=$2       ; shift 2 ;;
+    --products)     PRODUCTS=$2       ; shift 2 ;;
+    --docs)         BUILD_DOCS=true   ; shift 1 ;;
     --no-fetch)     NO_FETCH=true     ; shift 1 ;;
     --color)        COLORIZE=true     ; shift 1 ;;
     --prepare-only) PREP_ONLY=true    ; shift 1 ;;
@@ -94,9 +102,8 @@ do
   esac
 done
 
-# mangle whitespace and prepend ` -r ` in front of each ref
-REF_LIST=$(echo "$BRANCH" | sed  -e 's/ \+ / /g' -e 's/^/ /' -e 's/ $//' -e 's/ / -r /g')
-
+IFS=' ' read -r -a REF_LIST <<< "$GIT_REFS"
+IFS=' ' read -r -a PRODUCT_LIST <<< "$PRODUCTS"
 
 #
 # display configuration
@@ -105,19 +112,17 @@ start_section "configuration"
 
 # print "settings"
 settings=(
-  BRANCH
   BUILD_DOCS
   COLORIZE
   DOC_PUSH_PATH
   DOC_REPO_DIR
   DOC_REPO_NAME
   DOC_REPO_URL
+  GIT_REFS
   LSSTSW
   LSSTSW_BUILD_DIR
   NO_FETCH
-  PRODUCT
-  REF_LIST
-  RUN_DEMO
+  PRODUCTS
 )
 
 set_color "$LIGHT_CYAN"
@@ -152,24 +157,18 @@ fi
 print_info "Rebuild is commencing....stand by; using $REF_LIST"
 
 ARGS=()
-if [[ $NO_FETCH == true ]]; then
-  ARGS+=("-n")
-fi
-if [[ $PREP_ONLY == true ]]; then
-  ARGS+=("-p")
-fi
-if [[ ! -z $REF_LIST ]]; then
-  # XXX intentionally not quoted to allow word splitting
-  # shellcheck disable=SC2206
-  ARGS+=($REF_LIST)
-fi
-if [[ ! -z $PRODUCT ]]; then
-  # XXX intentionally not quoted to allow word splitting
-  # shellcheck disable=SC2206
-  ARGS+=($PRODUCT)
-fi
 
-if ! "${LSSTSW}/bin/rebuild" "${ARGS[@]}"; then
+[[ $NO_FETCH == true ]] &&  ARGS+=('-n')
+[[ $PREP_ONLY == true ]] && ARGS+=('-p')
+
+[[ ${#REF_LIST[@]} -ne 0 ]] &&
+  for r in ${REF_LIST[*]}; do
+    ARGS+=('-r' "$r")
+  done
+[[ ${#PRODUCT_LIST[@]} -ne 0 ]] &&
+  ARGS+=("${PRODUCT_LIST[@]}")
+
+if ! run "${LSSTSW}/bin/rebuild" "${ARGS[@]}"; then
   fail 'Failed during rebuild of DM stack.'
 fi
 
@@ -191,7 +190,7 @@ if [[ $BUILD_DOCS == true ]]; then
   start_section "doc build"
 
   print_info "Start Documentation build at: $(date)"
-  if ! "${SCRIPT_DIR}/create_xlinkdocs.sh" \
+  if ! run "${SCRIPT_DIR}/create_xlinkdocs.sh" \
     --type "master" \
     --path "$DOC_PUSH_PATH"; then
     fail "*** FAILURE: Doxygen document was not installed."
@@ -201,36 +200,6 @@ if [[ $BUILD_DOCS == true ]]; then
   end_section # doc build"
 else
   print_info "Skipping Documentation build."
-fi
-
-
-#
-# Finally run a simple test of package integration
-#
-if [[ $RUN_DEMO == true ]]; then
-  start_section "demo"
-
-  # run demo script from the source checkout dir as it will download and
-  # unpack a tarball
-  cd "$LSSTSW_BUILD_DIR"
-
-  ARGS=()
-  ARGS+=(--eups-tag "$MANIFEST_ID")
-  ARGS+=(--small)
-  ARGS+=(--debug)
-  for ref in $BRANCH; do
-    ARGS+=(--git-ref "$ref")
-  done
-
-  print_info "Start Demo run at: $(date)"
-  if ! "${SCRIPT_DIR}/runManifestDemo.sh" "${ARGS[@]}"; then
-    fail "*** There was an error running the simple integration demo."
-  fi
-  print_success "The simple integration demo was successfully run."
-
-  end_section # demo
-else
-  print_info "Skipping Demo."
 fi
 
 # vim: tabstop=2 shiftwidth=2 expandtab

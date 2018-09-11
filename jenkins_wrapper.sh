@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 # shellcheck source=./ccutils.sh
 source "${SCRIPT_DIR}/ccutils.sh"
 
@@ -14,73 +14,68 @@ set -xeo pipefail
 # The following environment variables are assumed to be declared by the caller:
 #
 # * LSST_COMPILER
+# * LSST_PRODUCTS
 # * LSST_PYTHON_VERSION
 #
 # optional:
 #
+# * LSST_BUILD_DOCS
+# * LSST_DEPLOY_MODE
+# * LSST_NO_FETCH
+# * LSST_PREP_ONLY
+# * LSST_REFS
+#
+# removed/fatal:
+#
 # * BRANCH
 # * deploy
-# * PRODUCT
 # * NO_FETCH
+# * PRODUCT
 # * SKIP_DEMO
 # * SKIP_DOCS
-# * PREP_ONLY
-#
 
-BRANCH=${BRANCH:-''}
-deploy=${deploy:-''}
-PRODUCT=${PRODUCT:-''}
 LSST_COMPILER=${LSST_COMPILER?LSST_COMPILER is required}
+LSST_PRODUCTS=${LSST_PRODUCTS?LSST_PRODUCTS is required}
 LSST_PYTHON_VERSION=${LSST_PYTHON_VERSION?LSST_PYTHON_VERSION is required}
 
-NO_FETCH=${NO_FETCH:-false}
-SKIP_DEMO=${SKIP_DEMO:-false}
-SKIP_DOCS=${SKIP_DOCS:-false}
-PREP_ONLY=${PREP_ONLY:-false}
+LSST_BUILD_DOCS=${LSST_BUILD_DOCS:-false}
+LSST_DEPLOY_MODE=${LSST_DEPLOY_MODE:-}
+LSST_NO_FETCH=${LSST_NO_FETCH:-false}
+LSST_PREP_ONLY=${LSST_PREP_ONLY:-false}
+LSST_REFS=${LSST_REFS:-}
+
+fatal_vars() {
+  local verboten=(
+    BRANCH
+    deploy
+    NO_FETCH
+    PRODUCT
+    SKIP_DEMO
+    SKIP_DOCS
+  )
+  local found=()
+
+  for v in ${verboten[*]}; do
+    if [[ -n ${!v+1} ]]; then
+      found+=("$v")
+      >&2 echo -e "${v} is not supported"
+    fi
+  done
+
+  [[ ${#found[@]} -ne 0 ]] && exit 1
+  return 0
+}
+fatal_vars
 
 ARGS=()
-
-# append lsst_ci to PRODUCT list unless SKIP_DEMO is set
-if [[ $SKIP_DEMO != true ]]; then
-  if [[ -z $PRODUCT ]]; then
-    # lsstsw default targets
-    PRODUCT="lsst_distrib qserv_distrib dax_webserv"
-  fi
-  PRODUCT="$PRODUCT lsst_ci"
-fi
-
-if [[ ! -z $BRANCH ]]; then
-  ARGS+=('--branch')
-  ARGS+=("$BRANCH")
-fi
-
-if [[ ! -z $PRODUCT ]]; then
-  ARGS+=('--product')
-  ARGS+=("$PRODUCT")
-fi
-
-if [[ $SKIP_DOCS == true ]]; then
-  ARGS+=('--skip_docs')
-fi
-
 ARGS+=('--color')
 
-if [[ $SKIP_DEMO == true ]]; then
-  ARGS+=('--skip_demo')
-fi
+[[ -n $LSST_REFS ]] &&     ARGS+=('--refs' "$LSST_REFS")
+[[ -n $LSST_PRODUCTS ]] && ARGS+=('--products' "$LSST_PRODUCTS")
 
-if [[ $NO_FETCH == true ]]; then
-  ARGS+=('--no-fetch')
-fi
-if [[ $PREP_ONLY == true ]]; then
-  ARGS+=('--prepare-only')
-fi
-
-# require that $LSST_COMPILER is defined
-if [[ -z $LSST_COMPILER ]]; then
-  >&2 echo -e 'LSST_COMPILER is not defined'
-  exit 1
-fi
+[[ $LSST_BUILD_DOCS == true ]] && ARGS+=('--docs')
+[[ $LSST_NO_FETCH == true ]] &&   ARGS+=('--no-fetch')
+[[ $LSST_PREP_ONLY == true ]] &&  ARGS+=('--prepare-only')
 
 cc::setup_first "$LSST_COMPILER"
 
@@ -118,7 +113,7 @@ esac
   fi
 
   # shellcheck disable=SC2154
-  if [[ $deploy == bleed ]]; then
+  if [[ $LSST_DEPLOY_MODE == bleed ]]; then
     OPTS+=('-b')
   fi
 
