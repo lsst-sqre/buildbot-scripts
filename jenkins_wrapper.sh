@@ -30,7 +30,6 @@ set -xeo pipefail
 # * BRANCH
 # * deploy
 # * NO_FETCH
-# * PREP_ONLY
 # * PRODUCT
 # * SKIP_DEMO
 # * SKIP_DOCS
@@ -50,7 +49,6 @@ fatal_vars() {
     BRANCH
     deploy
     NO_FETCH
-    PREP_ONLY
     PRODUCT
     SKIP_DEMO
     SKIP_DOCS
