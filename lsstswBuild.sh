@@ -16,6 +16,7 @@ GIT_REFS=
 PRODUCTS=
 NO_FETCH=false
 COLORIZE=false
+DEBUG=${DEBUG:-true}
 
 # Buildbot remotely invokes scripts with a stripped down environment.
 umask 002
@@ -72,6 +73,16 @@ end_section() {
   print_info "$sbar"
   # print a newline
   echo
+}
+
+run() {
+  if [[ $DRYRUN == true ]]; then
+    echo "$@"
+  elif [[ $DEBUG == true ]]; then
+    (set -x; "$@")
+  else
+    "$@"
+  fi
 }
 
 # shellcheck disable=SC2054 disable=SC2034
@@ -155,9 +166,9 @@ ARGS=()
     ARGS+=('-r' "$r")
   done
 [[ ${#PRODUCT_LIST[@]} -ne 0 ]] &&
-  ARGS+=("${PRODUCTS_LIST[@]}")
+  ARGS+=("${PRODUCT_LIST[@]}")
 
-if ! "${LSSTSW}/bin/rebuild" "${ARGS[@]}"; then
+if ! run "${LSSTSW}/bin/rebuild" "${ARGS[@]}"; then
   fail 'Failed during rebuild of DM stack.'
 fi
 
@@ -179,7 +190,7 @@ if [[ $BUILD_DOCS == true ]]; then
   start_section "doc build"
 
   print_info "Start Documentation build at: $(date)"
-  if ! "${SCRIPT_DIR}/create_xlinkdocs.sh" \
+  if ! run "${SCRIPT_DIR}/create_xlinkdocs.sh" \
     --type "master" \
     --path "$DOC_PUSH_PATH"; then
     fail "*** FAILURE: Doxygen document was not installed."
