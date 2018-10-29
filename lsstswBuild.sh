@@ -154,7 +154,7 @@ if [[ ! -x ${LSSTSW}/bin/rebuild ]]; then
   fail "Failed to find 'rebuild'."
 fi
 
-print_info "Rebuild is commencing....stand by; using $REF_LIST"
+print_info "Rebuild is commencing....stand by; using ${REF_LIST[*]}"
 
 ARGS=()
 
