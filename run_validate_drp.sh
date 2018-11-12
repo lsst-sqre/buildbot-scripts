@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -eo pipefail
 
 print_error() {
   >&2 echo -e "$@"
@@ -44,10 +44,10 @@ find_mem() {
       ;;
     Darwin)
       # I don't trust this fancy greppin' an' matchin' in the shell.
-      local free=$(vm_stat | grep 'Pages free:'     | \
-        tr -c -d [[:digit:]])
-      local inac=$(vm_stat | grep 'Pages inactive:' | \
-        tr -c -d [[:digit:]])
+      local free
+      free=$(vm_stat | grep 'Pages free:' | tr -c -d '[:digit:]')
+      local inac
+      inac=$(vm_stat | grep 'Pages inactive:' | tr -c -d '[:digit:]')
       sys_mem=$(( (free + inac) / ( 1024 * 256 ) ))
       ;;
     *)
@@ -65,7 +65,8 @@ find_mem() {
 target_cores() {
   local mem_per_core=${1:-1}
 
-  local sys_mem=$(find_mem)
+  local sys_mem
+  sys_mem=$(find_mem)
   local sys_cores
   sys_cores=$(getconf _NPROCESSORS_ONLN)
 
@@ -99,19 +100,11 @@ case "$LSST_VALIDATE_DRP_DATASET" in
     RESULTS=(
       Cfht_output_r.json
     )
-    LOGS=(
-      'Cfht/singleFrame.log'
-      'job_validate_drp.log'
-    )
     ;;
   validation_data_decam)
     RUN="$VALIDATE_DRP_DIR/examples/runDecamTest.sh"
     RESULTS=(
       Decam_output_z.json
-    )
-    LOGS=(
-      'Decam/singleFrame.log'
-      'job_validate_drp.log'
     )
     ;;
   validation_data_hsc)
@@ -120,10 +113,6 @@ case "$LSST_VALIDATE_DRP_DATASET" in
       Hsc_output_HSC-I.json
       Hsc_output_HSC-R.json
       Hsc_output_HSC-Y.json
-    )
-    LOGS=(
-      'Hsc/singleFrame.log'
-      'job_validate_drp.log'
     )
     ;;
   *)
