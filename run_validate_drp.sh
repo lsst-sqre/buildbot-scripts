@@ -81,7 +81,6 @@ target_cores() {
 check_env_vars
 
 set +o xtrace
-source /opt/lsst/software/stack/loadLSST.bash
 
 # if _CODE_DIR is defined, set that up instead of the default validate_drp
 # product
