@@ -1,6 +1,34 @@
 #!/bin/bash
 
-set -xe
+set -e
+
+print_error() {
+  >&2 echo -e "$@"
+}
+
+fail() {
+  local code=${2:-1}
+  [[ -n $1 ]] && print_error "$1"
+  # shellcheck disable=SC2086
+  exit $code
+}
+
+
+check_env_vars() {
+  local req_vars=(
+    LSST_VALIDATE_DRP_DATASET
+    LSST_VALIDATE_DRP_DATASET_DIR
+  )
+
+  local err
+  for v in "${req_vars[@]}"; do
+    [[ ! -v $v ]] && err="${err}Missing required env variable: ${v}\\n"
+  done
+
+  [[ -n $err ]] && fail "$err"
+
+  return 0
+}
 
 find_mem() {
   # Find system available memory in GiB
@@ -50,21 +78,23 @@ target_cores() {
   echo "$target_cores"
 }
 
+check_env_vars
+
 set +o xtrace
 source /opt/lsst/software/stack/loadLSST.bash
 
-# if CODE_DIR is defined, set that up instead of the default validate_drp
+# if _CODE_DIR is defined, set that up instead of the default validate_drp
 # product
-if [[ -n $CODE_DIR ]]; then
-  setup -k -r "$CODE_DIR"
+if [[ -n $LSST_VALIDATE_DRP_CODE_DIR ]]; then
+  setup -k -r "$LSST_VALIDATE_DRP_CODE_DIR"
 else
   setup validate_drp
 fi
 
-setup -k -r "$DATASET_DIR"
+setup -k -r "$LSST_VALIDATE_DRP_DATASET_DIR"
 set -o xtrace
 
-case "$DATASET" in
+case "$LSST_VALIDATE_DRP_DATASET" in
   validation_data_cfht)
     RUN="$VALIDATE_DRP_DIR/examples/runCfhtTest.sh"
     RESULTS=(
@@ -98,7 +128,7 @@ case "$DATASET" in
     )
     ;;
   *)
-    >&2 echo "Unknown DATASET: ${DATASET}"
+    >&2 echo "Unknown DATASET: ${LSST_VALIDATE_DRP_DATASET}"
     exit 1
     ;;
 esac
