@@ -70,9 +70,7 @@ target_cores() {
   local sys_cores
   sys_cores=$(getconf _NPROCESSORS_ONLN)
 
-  # bash doesn't support floating point arithmetic
   local target_cores
-  #target_cores=$(echo "$sys_mem / $mem_per_core" | bc)
   target_cores=$(awk "BEGIN{ print int($sys_mem / $mem_per_core) }")
   [[ $target_cores > $sys_cores ]] && target_cores=$sys_cores
 
