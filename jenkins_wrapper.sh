@@ -91,6 +91,10 @@ case $(uname -s) in
       # gfortran is part of the gcc bottle
       brew install gcc
     fi
+    if ! hash cmake; then
+      echo "cmake is required but missing"
+      brew install cmake
+    fi
     ;;
 esac
 
