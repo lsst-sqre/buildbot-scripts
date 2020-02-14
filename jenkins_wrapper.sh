@@ -125,7 +125,8 @@ esac
 
   ./bin/deploy -r "$LSST_SPLENV_REF" "${OPTS[@]}"
 )
-
+# environment name is used in setup.sh called from lsstswBuild.sh
+export LSST_CONDA_ENV_NAME="lsst-scipipe-${LSST_SPLENV_REF}"
 "${SCRIPT_DIR}/lsstswBuild.sh" "${ARGS[@]}"
 
 # vim: tabstop=2 shiftwidth=2 expandtab
