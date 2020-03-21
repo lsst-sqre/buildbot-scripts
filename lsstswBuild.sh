@@ -134,6 +134,7 @@ no_color
 
 end_section # configuration
 
+export EUPSPKG_NJOBS=${K8S_DIND_LIMITS_CPU:-8}
 
 #
 # display environment variables
