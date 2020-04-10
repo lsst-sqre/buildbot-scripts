@@ -70,6 +70,10 @@ cc::setup() {
   local compiler=${1?compiler string is required}
 
   case $compiler in
+    conda-system)
+      # don't do anything. The conda environment will be activated and set
+      # everything after this script is ran.
+      ;;
     devtoolset-*):
       cc::check_scl_collection "$compiler"
       cc::scl_source "$compiler"
