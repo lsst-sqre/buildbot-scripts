@@ -71,8 +71,8 @@ cc::setup() {
 
   case $compiler in
     conda-system)
-      # don't do anything. The conda environment will be activated and set
-      # everything after this script is ran.
+      # Don't do anything. The conda environment will be activated to set
+      # everything up after this script is executed.
       ;;
     devtoolset-*):
       cc::check_scl_collection "$compiler"
