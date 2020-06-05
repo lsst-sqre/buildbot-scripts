@@ -15,7 +15,6 @@ set -xeo pipefail
 #
 # * LSST_COMPILER
 # * LSST_PRODUCTS
-# * LSST_PYTHON_VERSION
 # * LSST_SPLENV_REF
 #
 # optional:
@@ -37,7 +36,6 @@ set -xeo pipefail
 
 LSST_COMPILER=${LSST_COMPILER?LSST_COMPILER is required}
 LSST_PRODUCTS=${LSST_PRODUCTS?LSST_PRODUCTS is required}
-LSST_PYTHON_VERSION=${LSST_PYTHON_VERSION?LSST_PYTHON_VERSION is required}
 LSST_SPLENV_REF=${LSST_SPLENV_REF?LSST_SPLENV_REF is required}
 
 LSST_BUILD_DOCS=${LSST_BUILD_DOCS:-false}
@@ -102,21 +100,6 @@ esac
   cd "$LSSTSW"
 
   OPTS=()
-
-  if [[ -n ${LSST_PYTHON_VERSION+1} ]]; then
-    case $LSST_PYTHON_VERSION in
-      2)
-        OPTS+=('-2')
-        ;;
-      3)
-        OPTS+=('-3')
-        ;;
-      *)
-        >&2 echo "unsupported python version: $LSST_PYTHON_VERSION"
-        exit 1
-        ;;
-    esac
-  fi
 
   # shellcheck disable=SC2154
   if [[ $LSST_DEPLOY_MODE == bleed ]]; then
