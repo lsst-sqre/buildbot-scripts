@@ -111,9 +111,9 @@ case "$LSST_VALIDATE_DRP_GEN3_DATASET" in
   validation_data_hsc)
     RUN="$METRIC_PIPELINE_TASKS_DIR/bin/measureHscMetrics.sh"
     RESULTS=(
-      validate_drp_design_HSC-I*.json
-      validate_drp_design_HSC-R*.json
-      validate_drp_design_HSC-Y*.json
+      validate_drp_*i*.json
+      validate_drp_*r*.json
+      validate_drp_*y*.json
     )
     ;;
   *)
