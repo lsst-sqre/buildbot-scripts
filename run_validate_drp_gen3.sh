@@ -98,23 +98,12 @@ set -o xtrace
 case "$LSST_VALIDATE_DRP_GEN3_DATASET" in
   validation_data_cfht)
     RUN="$METRIC_PIPELINE_TASKS_DIR/bin/measureCFHTMetrics.sh"
-    RESULTS=(
-      Cfht_output_r.json
-    )
     ;;
   validation_data_decam)
     RUN="$METRIC_PIPELINE_TASKS_DIR/bin/measureDecamMetrics.sh"
-    RESULTS=(
-      Decam_output_z.json
-    )
     ;;
   validation_data_hsc)
     RUN="$METRIC_PIPELINE_TASKS_DIR/bin/measureHscMetrics.sh"
-    RESULTS=(
-      validate_drp_*i*.json*
-      validate_drp_*r*.json*
-      validate_drp_*y*.json*
-    )
     ;;
   *)
     >&2 echo "Unknown DATASET: ${LSST_VALIDATE_DRP_DATASET}"
@@ -133,10 +122,10 @@ run_status=$?
 set -e
 
 echo "${RUN##*/} - exit status: ${run_status}"
-
+RESULTS=(validate_drp*)
 # bail out if the drp output file is missing
-if [[ ! -e  ${RESULTS[0]} ]]; then
-  echo "drp result file does not exist: ${RESULTS[0]}"
+if [[ ! -e "${RESULTS[0]}" ]]; then
+  echo "drp result files do not exist"
   exit 1
 fi
 
