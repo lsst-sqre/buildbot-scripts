@@ -3,9 +3,9 @@ ci-scripts
 
 [![Build Status](https://travis-ci.org/lsst-sqre/ci-scripts.png)](https://travis-ci.org/lsst-sqre/ci-scripts)
 
-This repo is an import of the state of lsst-dev:/home/buildbot/RHEL6/scripts
-as of 2015-03-17.  These scripts are invoked by the buildbot slave that
-is currently running on lsst-dev.
+This repo began as an import of the state of lsst-dev:/home/buildbot/RHEL6/scripts
+as of 2015-03-17.  These scripts were invoked by the buildbot worker that
+was running on lsst-dev; they are now invoked by Jenkins agents.
 
 The scripts appear to have been historically tracked by the
 [`lsst/buildbot`](https://github.com/lsst/buildbot/tree/master/scripts)
