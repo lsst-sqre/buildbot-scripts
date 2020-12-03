@@ -106,7 +106,8 @@ esac
     OPTS+=('-b')
   fi
 
-  ./bin/deploy -r "$LSST_SPLENV_REF" "${OPTS[@]}"
+  # updated from -r to -v whit the introduction of rubin-env
+  ./bin/deploy -v "$LSST_SPLENV_REF" "${OPTS[@]}"
 )
 # environment name is used in setup.sh called from lsstswBuild.sh
 export LSST_CONDA_ENV_NAME="lsst-scipipe-${LSST_SPLENV_REF}"
