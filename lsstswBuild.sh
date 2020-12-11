@@ -6,7 +6,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 # shellcheck source=./settings.cfg.sh
 source "${SCRIPT_DIR}/settings.cfg.sh"
 # shellcheck source=/dev/null
-source "${LSSTSW}/bin/setup.sh"
+source "${LSSTSW}/bin/envconfig"
 
 set -eo pipefail
 

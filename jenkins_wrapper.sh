@@ -106,10 +106,17 @@ esac
     OPTS+=('-b')
   fi
 
-  # updated from -r to -v whit the introduction of rubin-env
-  ./bin/deploy -v "$LSST_SPLENV_REF" "${OPTS[@]}"
+  # The LSST_SPLENV_REF can refer to a rubin-env version
+  #  or to an old scipipe_conda_env SHA1
+  if [[ $LSST_SPLENV_REF =~ [0-9]+\.[0-9]+\.[0-9A-Za-z-]+ ]]; then
+    ./bin/deploy -v "$LSST_SPLENV_REF" "${OPTS[@]}"
+  else
+    # this may be required in case we want to do a patch on a major release
+    #  pre instroduction of rubin-env
+    ./bin/deploy -r "$LSST_SPLENV_REF" "${OPTS[@]}"
+  fi
 )
-# environment name is used in setup.sh called from lsstswBuild.sh
+# environment name is used in envconfig (previously setup.sh) called from lsstswBuild.sh
 export LSST_CONDA_ENV_NAME="lsst-scipipe-${LSST_SPLENV_REF}"
 "${SCRIPT_DIR}/lsstswBuild.sh" "${ARGS[@]}"
 
