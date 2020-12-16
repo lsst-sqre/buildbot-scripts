@@ -106,18 +106,26 @@ esac
     OPTS+=('-b')
   fi
 
-  # The LSST_SPLENV_REF can refer to a rubin-env version
-  #  or to an old scipipe_conda_env SHA1
-  if [[ $LSST_SPLENV_REF =~ [0-9]+\.[0-9]+\.[0-9A-Za-z-]+ ]]; then
-    ./bin/deploy -v "$LSST_SPLENV_REF" "${OPTS[@]}"
+  if [[ -z "$RUBINENV_ORG_FORK" ]]; then
+    # The LSST_SPLENV_REF can refer to a rubin-env version
+    #  or to an old scipipe_conda_env SHA1
+    if [[ $LSST_SPLENV_REF =~ [0-9]+\.[0-9]+\.[0-9A-Za-z-]+ ]]; then
+      ./bin/deploy -v "$LSST_SPLENV_REF" "${OPTS[@]}"
+    else
+      # this may be required in case we want to do a patch on a major release
+      #  pre instroduction of rubin-env
+      ./bin/deploy -r "$LSST_SPLENV_REF" "${OPTS[@]}"
+    fi
+    LSST_CONDA_ENV_NAME="lsst-scipipe-${LSST_SPLENV_REF}"
   else
-    # this may be required in case we want to do a patch on a major release
-    #  pre instroduction of rubin-env
-    ./bin/deploy -r "$LSST_SPLENV_REF" "${OPTS[@]}"
+    # build and deploy a rubinenv environment from fork/branch
+    ./bin/deploy -v "$LSST_SPLENV_REF" "${OPTS[@]}"
+    ./bin/set_prereleased_env "$RUBINENV_ORG_FORK" "$RUBINENV_BRANCH"
+    LSST_CONDA_ENV_NAME=$(cat rubinenv-feedstock/env.name)
   fi
 )
 # environment name is used in envconfig (previously setup.sh) called from lsstswBuild.sh
-export LSST_CONDA_ENV_NAME="lsst-scipipe-${LSST_SPLENV_REF}"
+export LSST_CONDA_ENV_NAME
 "${SCRIPT_DIR}/lsstswBuild.sh" "${ARGS[@]}"
 
 # vim: tabstop=2 shiftwidth=2 expandtab
