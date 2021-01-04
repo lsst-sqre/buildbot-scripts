@@ -115,13 +115,15 @@ if [[ -z "$RUBINENV_ORG_FORK" ]]; then
     #  pre instroduction of rubin-env
     ./bin/deploy -r "$LSST_SPLENV_REF" "${OPTS[@]}"
   fi
-  export LSST_CONDA_ENV_NAME="lsst-scipipe-${LSST_SPLENV_REF}"
+  LSST_CONDA_ENV_NAME="lsst-scipipe-${LSST_SPLENV_REF}"
 else
   # build and deploy a rubinenv environment from fork/branch
   ./bin/deploy -v "$LSST_SPLENV_REF" "${OPTS[@]}"
   ./bin/set_prereleased_env "$RUBINENV_ORG_FORK" "$RUBINENV_BRANCH"
-  export LSST_CONDA_ENV_NAME="$(cat rubinenv-feedstock/env.name)"
+  LSST_CONDA_ENV_NAME="$(cat rubinenv-feedstock/env.name)"
 fi
+
+export LSST_CONDA_ENV_NAME
 
 "${SCRIPT_DIR}/lsstswBuild.sh" "${ARGS[@]}"
 
