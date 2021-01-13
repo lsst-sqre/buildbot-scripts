@@ -5,6 +5,8 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 # shellcheck source=./settings.cfg.sh
 source "${SCRIPT_DIR}/settings.cfg.sh"
+# Passing dummy parameter (0) to envconfig, othervise
+#  current parameters and options are passed to the sourced script
 # shellcheck source=/dev/null
 source "${LSSTSW}/bin/envconfig" 0
 
