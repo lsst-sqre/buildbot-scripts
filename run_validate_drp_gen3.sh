@@ -89,7 +89,7 @@ set +o xtrace
 if [[ -n $LSST_VALIDATE_DRP_GEN3_CODE_DIR ]]; then
   setup -k -r "$LSST_VALIDATE_DRP_GEN3_CODE_DIR"
 else
-  setup metric_pipeline_tasks
+  setup faro
 fi
 
 setup -k -r "$LSST_VALIDATE_DRP_GEN3_DATASET_DIR"
