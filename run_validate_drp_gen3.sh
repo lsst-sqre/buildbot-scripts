@@ -97,13 +97,13 @@ set -o xtrace
 
 case "$LSST_VALIDATE_DRP_GEN3_DATASET" in
   validation_data_cfht)
-    RUN="$METRIC_PIPELINE_TASKS_DIR/bin/measureCFHTMetrics.sh"
+    RUN="$FARO_DIR/bin/measureCFHTMetrics.sh"
     ;;
   validation_data_decam)
-    RUN="$METRIC_PIPELINE_TASKS_DIR/bin/measureDecamMetrics.sh"
+    RUN="$FARO_DIR/bin/measureDecamMetrics.sh"
     ;;
   validation_data_hsc)
-    RUN="$METRIC_PIPELINE_TASKS_DIR/bin/measureHscMetrics.sh"
+    RUN="$FARO_DIR/bin/measureHscMetrics.sh"
     ;;
   *)
     >&2 echo "Unknown DATASET: ${LSST_VALIDATE_DRP_DATASET}"
