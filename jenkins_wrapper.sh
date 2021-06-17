@@ -108,12 +108,18 @@ fi
 if [[ -z "$RUBINENV_ORG_FORK" ]]; then
   # The LSST_SPLENV_REF can refer to a rubin-env version
   #  or to an old scipipe_conda_env SHA1
+  #  or to an eups tag
   if [[ $LSST_SPLENV_REF =~ [0-9]+\.[0-9]+\.[0-9A-Za-z-]+ ]]; then
     ./bin/deploy -v "$LSST_SPLENV_REF" "${OPTS[@]}"
-  else
+  elif [[ $LSST_SPLENV_REF =~ [0-9a-f]* ]]; then
     # this may be required in case we want to do a patch on a major release
     #  pre instroduction of rubin-env
     ./bin/deploy -r "$LSST_SPLENV_REF" "${OPTS[@]}"
+  elif [[ $LSST_SPLENV_REF == [dsvw]* ]]; then
+    ./bin/deploy -x "$LSST_SPLENV_REF" "${OPTS[*]}"
+  else
+    echo "Unrecognized environment reference: $LSST_SPLENV_REF"
+    exit 1
   fi
   LSST_CONDA_ENV_NAME="lsst-scipipe-${LSST_SPLENV_REF}"
 else
