@@ -111,7 +111,7 @@ if [[ -z "$RUBINENV_ORG_FORK" ]]; then
   #  or to an eups tag
   if [[ $LSST_SPLENV_REF =~ [0-9]+\.[0-9]+\.[0-9A-Za-z-]+ ]]; then
     ./bin/deploy -v "$LSST_SPLENV_REF" "${OPTS[@]}"
-  elif [[ $LSST_SPLENV_REF =~ [0-9a-f]* ]]; then
+  elif [[ $LSST_SPLENV_REF == [0-9a-f]* ]]; then
     # this may be required in case we want to do a patch on a major release
     #  pre instroduction of rubin-env
     ./bin/deploy -r "$LSST_SPLENV_REF" "${OPTS[@]}"
